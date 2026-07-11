@@ -499,6 +499,7 @@ function buildGrid(resetItems = true){
   }
 }
   paintAll(); // 重新畫上（換紙張尺寸/方向時）保留下來的圖案
+  zoom = computeFitZoom(); // 每次換紙張尺寸/方向/格數，都重新算一次能完整顯示畫布的縮放比例
   applyZoom();
   scheduleAutosave();
 }
@@ -528,6 +529,20 @@ function nudgeItem(id, dr, dc){
 
 let zoom = 1;
 const zoomLabel = document.getElementById("zoomLabel");
+const canvasAreaEl = document.querySelector(".canvas-area");
+const CANVAS_FIT_MARGIN = 16; // 可視區域左右各留的安全邊距(px)
+const MIN_ZOOM = 0.15; // 手動 -/+ 縮放的下限，放寬到能容納 A3 橫式在窄螢幕手機也能縮到完整顯示
+const MAX_ZOOM = 1;
+
+// 依照畫布目前的實際格數(gridCols)，算出一個能讓畫布寬度完整塞進可視區域的縮放比例，
+// 讓手機版切換到格數較多的尺寸（例如 A3 橫式）時，不用使用者自己手動縮小就能看到全貌。
+function computeFitZoom(){
+  const naturalWidth = gridCols * CELL_PX;
+  if(naturalWidth <= 0) return MAX_ZOOM;
+  const availWidth = canvasAreaEl.clientWidth - CANVAS_FIT_MARGIN * 2;
+  const fit = availWidth / naturalWidth;
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fit));
+}
 
 function applyZoom(){
   stitchGridEl.style.transform = `scale(${zoom})`;

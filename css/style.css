@@ -190,6 +190,10 @@ width: 100%;
   }
   .action-btn.primary{background:rgba(131,129,92,0.85);color:#fff;border-color:rgba(131,129,92,0.85);}
   .action-btn.eraser-active{background:rgba(192,57,43,0.45);color:#fff;border-color:rgba(192,57,43,0.45);}
+  .action-btn.danger{background:rgba(192,57,43,0.85);color:#fff;border-color:rgba(192,57,43,0.85);}
+  .action-btn.danger:hover{background:rgba(192,57,43,1);}
+  .confirm-actions{display:flex;gap:10px;}
+  .confirm-actions .action-btn{flex:1;margin-left:0;}
   .zoom-control{display:flex;align-items:center;gap:6px;margin-left:auto;}
   .zoom-control .action-btn{margin-left:0;}
   .export-field{

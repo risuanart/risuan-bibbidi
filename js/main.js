@@ -112,12 +112,12 @@ document.getElementById("resPickerOverlay").onclick = (e)=>{
 };
 
 document.getElementById("zoomInBtn").onclick = ()=>{
-  zoom = Math.min(zoom + 0.1, 1);   // 最大放大到 100%
+  zoom = Math.min(zoom + 0.1, MAX_ZOOM);
   applyZoom();
 };
 
 document.getElementById("zoomOutBtn").onclick = ()=>{
-  zoom = Math.max(zoom - 0.1, 0.3); // 最小縮小到 30%
+  zoom = Math.max(zoom - 0.1, MIN_ZOOM);
   applyZoom();
 };
 
@@ -135,7 +135,7 @@ gridWrapperEl.addEventListener('touchmove', (e)=>{
     e.preventDefault(); // 避免觸發手機瀏覽器自己的整頁縮放
     const newDistance = touchDistance(e.touches[0], e.touches[1]);
     const scaleFactor = newDistance / pinchState.startDistance;
-    zoom = Math.min(1, Math.max(0.3, pinchState.startZoom * scaleFactor));
+    zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchState.startZoom * scaleFactor));
     applyZoom();
   }
 }, {passive:false});
@@ -157,7 +157,15 @@ document.getElementById("eraserBtn").onclick = ()=>{
 };
 
 document.getElementById("clearBtn").onclick = ()=>{
+  openConfirmClear();
+};
+document.getElementById("confirmClearCancelBtn").onclick = closeConfirmClear;
+document.getElementById("confirmClearOkBtn").onclick = ()=>{
+  closeConfirmClear();
   buildGrid();
+};
+document.getElementById("confirmClearOverlay").onclick = (e)=>{
+  if(e.target.id === "confirmClearOverlay") closeConfirmClear(); // 點背景霧面等同取消
 };
 
 document.getElementById("exportBtn").onclick = exportCanvasAsPng;

@@ -284,3 +284,11 @@ function openHelp(){
 function closeHelp(){
   document.getElementById("helpOverlay").style.display = "none";
 }
+
+// ---- 清空畫布二次確認彈窗：避免手滑誤觸，把已排版的內容整個清掉 ----
+function openConfirmClear(){
+  document.getElementById("confirmClearOverlay").style.display = "flex";
+}
+function closeConfirmClear(){
+  document.getElementById("confirmClearOverlay").style.display = "none";
+}
