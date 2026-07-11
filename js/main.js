@@ -168,7 +168,16 @@ document.getElementById("confirmClearOverlay").onclick = (e)=>{
   if(e.target.id === "confirmClearOverlay") closeConfirmClear(); // 點背景霧面等同取消
 };
 
-document.getElementById("exportBtn").onclick = exportCanvasAsPng;
+document.getElementById("exportBtn").onclick = openExportForm;
+document.getElementById("exportFormCancelBtn").onclick = closeExportForm;
+document.getElementById("exportFormOverlay").onclick = (e)=>{
+  if(e.target.id === "exportFormOverlay") closeExportForm(); // 點背景霧面等同取消
+};
+document.getElementById("exportFormConfirmBtn").onclick = ()=>{
+  if(!validateExportFields()) return; // 保底檢查，正常情況下欄位沒填完按鈕本來就是 disabled
+  closeExportForm();
+  exportCanvasAsPng();
+};
 
 document.querySelector(".help-btn").onclick = openHelp;
 document.getElementById("helpCloseBtn").onclick = closeHelp;
@@ -199,6 +208,7 @@ document.getElementById("imageUploadInput").addEventListener("change", (e)=>{
   const handler = ()=>{
     const hasValue = id==="exportName" ? el.value.trim() : el.value;
     if(hasValue) el.classList.remove("missing");
+    updateExportFormConfirmState();
     scheduleAutosave();
   };
   el.addEventListener("input", handler);

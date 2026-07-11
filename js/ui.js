@@ -319,3 +319,23 @@ function openConfirmClear(){
 function closeConfirmClear(){
   document.getElementById("confirmClearOverlay").style.display = "none";
 }
+
+// ---- 輸出圖檔前的預約資訊彈窗：三個欄位都填完才能繼續輸出 ----
+function isExportFormComplete(){
+  const dateVal = document.getElementById("exportDate").value;
+  const timeVal = document.getElementById("exportTime").value;
+  const nameVal = document.getElementById("exportName").value.trim();
+  return !!(dateVal && timeVal && nameVal);
+}
+
+function updateExportFormConfirmState(){
+  document.getElementById("exportFormConfirmBtn").disabled = !isExportFormComplete();
+}
+
+function openExportForm(){
+  updateExportFormConfirmState();
+  document.getElementById("exportFormOverlay").style.display = "flex";
+}
+function closeExportForm(){
+  document.getElementById("exportFormOverlay").style.display = "none";
+}

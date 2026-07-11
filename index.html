@@ -48,30 +48,9 @@
       </div>
     </div>
     <div class="toolbar-row">
-     <div class="export-field">
-       <label for="exportDate">預約課程日期</label>
-       <input type="date" id="exportDate" class="export-input">
-     </div>
-     <div class="export-field">
-       <label for="exportTime">預約課程時間</label>
-       <select id="exportTime" class="export-input">
-         <option value="" selected>請選擇時段</option>
-         <option value="10:00">10:00</option>
-         <option value="14:00">14:00</option>
-       </select>
-     </div>
-     <div class="export-field">
-       <label for="exportName">預約姓名</label>
-       <input type="text" id="exportName" class="export-input" placeholder="請輸入姓名">
-     </div>
-    </div>
-    <div class="toolbar-row">
      <button class="action-btn" id="eraserBtn" style="margin-left:0">單格去除</button>
      <button class="action-btn" id="clearBtn" style="margin-left:0">清空畫布</button>
      <button class="action-btn primary" id="exportBtn" style="margin-left:0">輸出圖檔</button>
-    </div>
-    <div class="toolbar-row">
-      <span id="exportError" class="export-error"></span>
     </div>
     <div class="grid-wrapper">
       <div class="zoom-viewport" id="zoomViewport">
@@ -137,6 +116,36 @@
     <div class="confirm-actions">
       <button class="action-btn" id="confirmClearCancelBtn" style="margin-left:0;">取消</button>
       <button class="action-btn danger" id="confirmClearOkBtn" style="margin-left:0;">確定清空</button>
+    </div>
+  </div>
+</div>
+
+<div class="help-overlay" id="exportFormOverlay">
+  <div class="help-card">
+    <h3 class="help-title" style="text-align:center;margin-top:0;">填寫預約資訊</h3>
+    <p class="help-desc" style="text-align:center;">請填寫以下資訊，才能輸出圖檔，方便我們依時段整理收件</p>
+    <div class="export-form-fields">
+      <div class="export-field">
+        <label for="exportDate">預約課程日期</label>
+        <input type="date" id="exportDate" class="export-input">
+      </div>
+      <div class="export-field">
+        <label for="exportTime">預約課程時間</label>
+        <select id="exportTime" class="export-input">
+          <option value="" selected>請選擇時段</option>
+          <option value="10:00">10:00</option>
+          <option value="14:00">14:00</option>
+        </select>
+      </div>
+      <div class="export-field">
+        <label for="exportName">預約姓名</label>
+        <input type="text" id="exportName" class="export-input" placeholder="請輸入姓名">
+      </div>
+    </div>
+    <span id="exportError" class="export-error"></span>
+    <div class="confirm-actions">
+      <button class="action-btn" id="exportFormCancelBtn" style="margin-left:0;">取消</button>
+      <button class="action-btn primary" id="exportFormConfirmBtn" style="margin-left:0;" disabled>確定並輸出</button>
     </div>
   </div>
 </div>
