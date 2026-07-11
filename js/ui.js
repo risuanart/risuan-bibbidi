@@ -204,7 +204,10 @@ function buildExportFilename(){
   const dateVal = document.getElementById("exportDate").value;
   const timeVal = document.getElementById("exportTime").value.replace(/:/g, "-");
   const nameVal = sanitizeForFilename(document.getElementById("exportName").value);
-  return `日宣bibbidi設計台＿${dateVal}＿${timeVal}＿${nameVal}.png`;
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `日宣bibbidi設計台＿${dateVal}＿${timeVal}＿${nameVal}＿${stamp}.png`;
 }
 
 function exportCanvasAsPng(){
@@ -245,10 +248,31 @@ function exportCanvasAsPng(){
     }
   });
 
-  const link = document.createElement("a");
-  link.download = buildExportFilename();
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  const filename = buildExportFilename();
+
+  canvas.toBlob(async (blob)=>{
+    if(!blob) return;
+
+    // 手機上優先用系統原生的分享選單，這樣使用者可以直接選「儲存影像」存進照片相簿，
+    // 不像 <a download> 只會存進「檔案」App
+    const file = new File([blob], filename, { type: "image/png" });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      try{
+        await navigator.share({ files: [file], title: filename });
+        return;
+      }catch(err){
+        if(err && err.name === "AbortError") return; // 使用者自己按取消，不當作失敗
+        // 分享失敗（例如某些瀏覽器版本問題），往下走原本的下載方式當備援
+      }
+    }
+
+    // 不支援 Web Share API 的環境（例如桌面瀏覽器）：維持原本的下載方式
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    setTimeout(()=> URL.revokeObjectURL(link.href), 1000);
+  }, "image/png");
 }
 
 // ---- 使用說明：依照目前實際操作方式寫成一步一步的教學，搭配簡單的 emoji 圖示 ----
@@ -273,7 +297,10 @@ function renderHelpStep(){
   const nextBtn = document.getElementById("helpNextBtn");
   const isLast = helpStepIndex === helpSteps.length - 1;
   nextBtn.title = isLast ? "完成" : "下一步";
-  nextBtn.textContent = isLast ? "✓" : "›";
+  nextBtn.setAttribute("aria-label", isLast ? "Finish" : "Next");
+  nextBtn.innerHTML = isLast
+    ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+    : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
 }
 
 function openHelp(){
