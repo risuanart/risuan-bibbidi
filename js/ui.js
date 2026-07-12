@@ -160,12 +160,25 @@ function renderSizeOptions(){
   Object.keys(paperSizes).forEach(size=>{
     const b = document.createElement("button");
     b.className = state.paper===size ? "active" : "";
-    b.textContent = size;
+    b.textContent = `${size}・NT$${paperSizes[size].price}`;
     b.onclick = ()=>{ state.paper = size; renderSizeOptions(); buildGrid(false); };
     wrap.appendChild(b);
   });
   sizeOptionsEl.appendChild(wrap);
+
+  const note = document.createElement("span");
+  note.className = "price-note";
+  note.textContent = "不含畫框費用";
+  sizeOptionsEl.appendChild(note);
+
   positionSegmentedSlider(sizeOptionsEl);
+  updateCurrentPriceLabel();
+}
+
+// 畫布上方常駐標籤：讓使用者排版到一半也能隨時看到目前選的尺寸跟價格
+function updateCurrentPriceLabel(){
+  const price = paperSizes[state.paper].price;
+  document.getElementById("currentPriceLabel").textContent = `目前選擇：${state.paper}・NT$${price}（不含畫框費用）`;
 }
 
 function positionSegmentedSlider(containerEl){

@@ -136,10 +136,10 @@ const categories = {
 "上傳圖片": []
 };
 
-// 紙張尺寸（單位 mm）
+// 紙張尺寸（單位 mm）與對應價格（新台幣，不含畫框費用；格數/解析度不影響價格）
 const paperSizes = {
-  "A4": {w:210, h:297},
-  "A3": {w:297, h:420}
+  "A4": {w:210, h:297, price:1600},
+  "A3": {w:297, h:420, price:1900}
 };
 
 const LETTER_FONT = `"Allura", cursive`;
