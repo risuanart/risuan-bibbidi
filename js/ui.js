@@ -74,12 +74,31 @@ function initHangulComposer(){
   hangulPreviewBtnEl.onclick = ()=>{
     const composed = composeHangul(choSelectEl.value, jungSelectEl.value, jongSelectEl.value);
     if(!composed) return;
-    exitEraserMode();
-    state.selectedGlyph = composed;
-    renderIcons();
-    renderHangulPreview();
+    if(isCommonHangulSyllable(composed)){
+      selectHangulGlyph(composed);
+    } else {
+      openHangulWarn(composed); // 不是常見會用到的字，先跳出確認提醒
+    }
   };
   renderHangulPreview();
+}
+
+function selectHangulGlyph(composed){
+  exitEraserMode();
+  state.selectedGlyph = composed;
+  renderIcons();
+  renderHangulPreview();
+}
+
+// ---- 韓文組字防呆提醒：組出來的字不是常見會用到的字時，先跟使用者確認 ----
+let pendingHangulComposed = null;
+function openHangulWarn(composed){
+  pendingHangulComposed = composed;
+  document.getElementById("hangulWarnOverlay").style.display = "flex";
+}
+function closeHangulWarn(){
+  document.getElementById("hangulWarnOverlay").style.display = "none";
+  pendingHangulComposed = null;
 }
 
 function renderHangulPreview(){

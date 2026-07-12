@@ -168,6 +168,15 @@ document.getElementById("confirmClearOverlay").onclick = (e)=>{
   if(e.target.id === "confirmClearOverlay") closeConfirmClear(); // 點背景霧面等同取消
 };
 
+document.getElementById("hangulWarnEditBtn").onclick = closeHangulWarn;
+document.getElementById("hangulWarnUseBtn").onclick = ()=>{
+  if(pendingHangulComposed) selectHangulGlyph(pendingHangulComposed);
+  closeHangulWarn();
+};
+document.getElementById("hangulWarnOverlay").onclick = (e)=>{
+  if(e.target.id === "hangulWarnOverlay") closeHangulWarn(); // 點背景霧面等同「修改」
+};
+
 document.getElementById("exportBtn").onclick = openExportForm;
 document.getElementById("exportFormCancelBtn").onclick = closeExportForm;
 document.getElementById("exportFormOverlay").onclick = (e)=>{
