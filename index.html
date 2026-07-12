@@ -17,7 +17,13 @@
     <h1>日宣bibbidi設計台</h1>
     <p>請在拼貼完成後，將成品傳輸給我們，我們將協助準備課前所需的材料</p>
 
-    <div class="tabs" id="tabs"></div>
+    <div class="tabs-wrap" id="tabsWrap">
+      <button class="tabs-toggle" id="tabsToggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+        <span id="tabsToggleLabel"></span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="tabs" id="tabs"></div>
+    </div>
     <div class="hangul-composer" id="hangulComposer" style="display:none;">
       <div class="hangul-composer-row">
         <select id="choSelect" class="hangul-select"></select>

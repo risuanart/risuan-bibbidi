@@ -179,6 +179,12 @@ document.getElementById("exportFormConfirmBtn").onclick = ()=>{
   exportCanvasAsPng();
 };
 
+document.getElementById("tabsToggle").onclick = toggleTabsDropdown;
+document.addEventListener("click", (e)=>{
+  const wrap = document.getElementById("tabsWrap");
+  if(!wrap.contains(e.target)) closeTabsDropdown(); // 點選單以外的地方也收合
+});
+
 document.querySelector(".help-btn").onclick = openHelp;
 document.getElementById("helpCloseBtn").onclick = closeHelp;
 document.getElementById("helpOverlay").onclick = (e)=>{

@@ -29,21 +29,59 @@
     max-width: 100%;
     overflow-x: auto;         /* 格子太寬時可以左右滑動看 */
   }
-  #tabs{
-    position: fixed;      /* 讓按鈕脫離原本排版，浮動定位 */
-    top: 10px;
-    right: 10px;
-    display: flex;
-    flex-direction: column;   /* 由上往下排列 */
-    gap: 6px;
-    width: 72px;              /* 窄寬按鈕區 */
-    z-index: 999;
+  .sidebar{
+    position: relative;      /* 收合鈕用絕對定位貼齊標題右側，需要這一層當基準 */
   }
-  #tabs .tab{
-    padding: 4px 4px;        /* 縮小按鈕尺寸 */
-    font-size: 11px;
-    width: 100%;
-width: 100%;
+  .sidebar h1{
+    max-width: calc(100% - 156px); /* 幫收合鈕（貼在標題右側）預留空間，最長分類名稱「上傳圖片」也要留得下，避免文字被蓋住 */
+  }
+  .tabs-wrap{
+    margin-bottom: 16px;
+  }
+  /* 這幾條都用 .tabs-wrap 前綴提高優先度，避免被後面桌面版同名 class 的樣式蓋掉 */
+  .tabs-wrap .tabs-toggle{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: absolute;      /* 貼到標題（.sidebar 內距頂端）右側，不佔原本版面高度 */
+    top: 28px;                /* 對齊 .sidebar 的 padding-top，跟標題文字同一個起始高度 */
+    right: 26px;               /* 對齊 .sidebar 的 padding-right */
+    background: var(--pill-bg);
+    color: var(--sidebar-text);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 51;
+  }
+  .tabs-wrap .tabs{
+    display: none;            /* 預設收合，點擊收合鈕才展開 */
+    position: absolute;
+    top: 44px;                /* 實際值會在展開時由 JS 依收合鈕實際高度重新計算，這裡只是保底預設值 */
+    right: 26px;               /* 貼齊收合鈕右緣，只設 right 不設 left，寬度就會依內容自動縮放 */
+    min-width: 96px;           /* 分類名稱只有一兩個字時，避免選單看起來太窄 */
+    max-width: calc(100% - 52px); /* 保底上限，避免未來分類名稱變長時撐出側邊欄 */
+    width: max-content;
+    flex-direction: column;   /* 展開後由上往下排列 */
+    flex-wrap: nowrap;        /* 覆蓋桌面版的 flex-wrap:wrap，避免超過高度時被擠成多欄 */
+    gap: 4px;
+    margin-bottom: 0;
+    background: #4a4a43;
+    border-radius: 12px;
+    padding: 8px;
+    max-height: 40vh;
+    overflow-y: auto;         /* 分類太多時可以在選單內捲動 */
+    z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .tabs-wrap .tabs.open{
+    display: flex;            /* 展開狀態 */
+  }
+  .tabs-wrap .tabs .tab{
+    width: 100%;              /* 相對於選單本身（已經是縮放後的寬度）撐滿，讓每個按鈕一樣寬 */
+    white-space: nowrap;
+    text-align: left;
   }
 }
   :root{
@@ -68,6 +106,7 @@ width: 100%;
   .sidebar h1{font-family:"Noto Serif TC",Georgia,serif;font-weight:700;font-size:20px;margin:0 0 8px;}
   .sidebar p{font-size:12px;line-height:1.6;opacity:.9;margin:0 0 10px;}
 
+  .tabs-toggle{ display:none; } /* 桌面版維持原本展開列表，收合按鈕只在手機版顯示 */
   .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
   .tab{
     background:var(--pill-bg);border:none;color:var(--sidebar-text);

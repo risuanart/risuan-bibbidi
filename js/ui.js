@@ -12,10 +12,32 @@ function renderTabs(){
     const b = document.createElement("button");
     b.className = "tab" + (cat===state.category ? " active": "");
     b.textContent = cat;
-    b.onclick = ()=>{ state.category = cat; renderTabs(); renderIcons(); };
+    b.onclick = ()=>{ state.category = cat; renderTabs(); renderIcons(); closeTabsDropdown(); };
     tabsEl.appendChild(b);
   });
   document.getElementById("hangulComposer").style.display = (state.category === "韓文") ? "block" : "none";
+  document.getElementById("tabsToggleLabel").textContent = `分類：${state.category}`;
+}
+
+// ---- 手機版分類收合選單：收合鈕貼在標題右側，預設收合，點擊才展開，選擇分類後自動收合 ----
+// 收合鈕跟展開選單都用絕對定位貼在 .sidebar 上，這裡依收合鈕實際高度算出選單該貼在哪個高度，
+// 這樣不管標題文字換行與否、鈕的實際大小是多少，選單都會準確貼在收合鈕正下方。
+function positionTabsDropdown(){
+  const toggleBtn = document.getElementById("tabsToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const toggleRect = toggleBtn.getBoundingClientRect();
+  const sidebarRect = sidebar.getBoundingClientRect();
+  tabsEl.style.top = (toggleRect.bottom - sidebarRect.top + 6) + "px";
+}
+
+function toggleTabsDropdown(){
+  const isOpen = tabsEl.classList.toggle("open");
+  document.getElementById("tabsToggle").setAttribute("aria-expanded", isOpen ? "true" : "false");
+  if(isOpen) positionTabsDropdown();
+}
+function closeTabsDropdown(){
+  tabsEl.classList.remove("open");
+  document.getElementById("tabsToggle").setAttribute("aria-expanded", "false");
 }
 
 // ---- 韓文組字工具：選子音/母音(/收尾子音)，即時組成完整韓文字，點一下就能拿去蓋印 ----
