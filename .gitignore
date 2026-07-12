@@ -1,7 +1,9 @@
 .DS_Store
 .claude/
 tools/
-DEPLOY-NOTES.md
+docs/
+網站密碼紀錄.md
 *.webloc
+*.app
 private-worker/
 .wrangler/
