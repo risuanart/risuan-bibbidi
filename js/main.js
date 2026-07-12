@@ -188,6 +188,12 @@ document.getElementById("exportFormConfirmBtn").onclick = ()=>{
   exportCanvasAsPng();
 };
 
+document.getElementById("joinLineBtn").href = STUDIO_LINE_URL;
+document.getElementById("exportDoneCloseBtn").onclick = closeExportDone;
+document.getElementById("exportDoneOverlay").onclick = (e)=>{
+  if(e.target.id === "exportDoneOverlay") closeExportDone(); // 點背景霧面也可以關閉
+};
+
 document.getElementById("tabsToggle").onclick = toggleTabsDropdown;
 document.addEventListener("click", (e)=>{
   const wrap = document.getElementById("tabsWrap");

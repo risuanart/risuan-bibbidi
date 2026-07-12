@@ -318,9 +318,10 @@ function exportCanvasAsPng(){
     if(navigator.canShare && navigator.canShare({ files: [file] })){
       try{
         await navigator.share({ files: [file], title: filename });
+        openExportDone();
         return;
       }catch(err){
-        if(err && err.name === "AbortError") return; // 使用者自己按取消，不當作失敗
+        if(err && err.name === "AbortError") return; // 使用者自己按取消，不當作失敗，也不用提醒加LINE
         // 分享失敗（例如某些瀏覽器版本問題），往下走原本的下載方式當備援
       }
     }
@@ -331,6 +332,7 @@ function exportCanvasAsPng(){
     link.href = URL.createObjectURL(blob);
     link.click();
     setTimeout(()=> URL.revokeObjectURL(link.href), 1000);
+    openExportDone();
   }, "image/png");
 }
 
@@ -397,4 +399,12 @@ function openExportForm(){
 }
 function closeExportForm(){
   document.getElementById("exportFormOverlay").style.display = "none";
+}
+
+// ---- 輸出/分享完成後的提示：順便提醒使用者加畫室LINE好友，非必要、不擋流程 ----
+function openExportDone(){
+  document.getElementById("exportDoneOverlay").style.display = "flex";
+}
+function closeExportDone(){
+  document.getElementById("exportDoneOverlay").style.display = "none";
 }
