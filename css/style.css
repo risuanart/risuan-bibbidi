@@ -278,7 +278,7 @@
   }
   .action-btn{
     margin-left:auto;background:#fff;border:1px solid var(--line);padding:8px 18px;
-    border-radius:20px;font-size:13px;cursor:pointer;
+    border-radius:20px;font-size:13px;cursor:pointer;touch-action:manipulation;
   }
   .action-btn.primary{background:rgba(var(--color-primary-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-rgb),0.85);}
   .action-btn.eraser-default{background:rgba(var(--color-primary-rgb),0.15);color:var(--color-primary);border-color:rgba(var(--color-primary-rgb),0.35);}
