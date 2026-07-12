@@ -41,6 +41,7 @@ gridWrapperEl.addEventListener('scroll', refreshSelectionUI);
 document.querySelector('.canvas-area').addEventListener('scroll', refreshSelectionUI);
 window.addEventListener('resize', refreshSelectionUI);
 window.addEventListener('resize', positionAllSegmentedSliders);
+window.addEventListener('resize', updateCanvasFitBadge);
 
 document.getElementById("flipHBtn").onclick = (e)=>{
   e.stopPropagation();
@@ -150,9 +151,21 @@ document.getElementById("eraserBtn").onclick = ()=>{
   gridWrapperEl.classList.toggle("eraser-mode", state.eraserMode);
   clearPreview();
   if(state.eraserMode){
+    exitPaintMode(); // 單格去除、單格繪畫只能開一個
     state.selectedGlyph = null;
     deselectItem();
     renderIcons();
+  }
+};
+
+document.getElementById("paintBtn").onclick = ()=>{
+  state.paintMode = !state.paintMode;
+  document.getElementById("paintBtn").classList.toggle("paint-active", state.paintMode);
+  clearPreview();
+  if(state.paintMode){
+    exitEraserMode(); // 單格去除、單格繪畫只能開一個
+    state.selectedGlyph = null;
+    deselectItem();
   }
 };
 
@@ -323,6 +336,7 @@ function openMagnify(){
 }
 
 function closeMagnify(){
+  exitPaintMode(); // 單格繪畫只存在放大檢視裡，離開就強制關閉，避免留著跑到外面的畫布繼續生效
   clearBtnEl.parentElement.insertBefore(eraserBtnEl, clearBtnEl); // 單格去除搬回清空畫布前面，恢復原本順序
   canvasAreaEl.appendChild(gridWrapperEl); // 畫布搬回畫布區最後面
   magnifyOverlayEl.classList.remove("open");

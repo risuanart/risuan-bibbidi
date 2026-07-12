@@ -241,7 +241,7 @@ function validateExportFields(){
   const missing = [];
   if(!dateEl.value) missing.push("預約課程日期");
   if(!timeEl.value) missing.push("預約課程時間");
-  if(!nameEl.value.trim()) missing.push("姓名");
+  if(!nameEl.value.trim()) missing.push("預約姓名");
   if(!lineNameEl.value.trim()) missing.push("LINE名稱");
 
   dateEl.classList.toggle("missing", !dateEl.value);
@@ -347,7 +347,7 @@ function drawExportInfoBar(ctx, canvasWidth, infoBarY){
   ctx.fillStyle = "#2a2a25";
   ctx.textBaseline = "middle";
   ctx.font = "28px 'Noto Serif TC', serif";
-  const line1 = `姓名：${nameVal}　　LINE：${lineNameVal}`;
+  const line1 = `預約姓名：${nameVal}　　LINE名稱：${lineNameVal}`;
   const line2 = `日期：${dateVal}　　時段：${timeVal}　　尺寸：${state.paper}`;
   ctx.fillText(line1, 24, infoBarY + EXPORT_INFO_BAR_HEIGHT*0.35);
   ctx.fillText(line2, 24, infoBarY + EXPORT_INFO_BAR_HEIGHT*0.72);

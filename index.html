@@ -107,6 +107,7 @@
 </div>
 </div>
       <div class="selection-frame" id="selectionFrame"></div>
+      <div class="canvas-fit-badge" id="canvasFitBadge">目前畫布完整顯示</div>
     </div>
   </main>
 </div>
@@ -216,13 +217,16 @@
 </div>
 
 <!-- 任務19方向B：放大檢視彈窗。單純是「用比較大的畫面檢視/微調已排好的圖案」，
-     不能在裡面選新圖案、不能調整縮放、也不能清空畫布，只留單格去除。
+     不能在裡面選新圖案、不能調整縮放、也不能清空畫布，只留單格去除跟單格繪畫。
      開啟時把單格去除鈕跟畫布搬進下面這幾個 slot，關閉時再搬回原本位置，
-     操作的是同一份DOM/狀態，不會有資料不同步的問題 -->
+     操作的是同一份DOM/狀態，不會有資料不同步的問題。單格繪畫只存在放大檢視裡，
+     不會搬進搬出，所以直接寫在這裡當固定內容 -->
 <div class="magnify-overlay" id="magnifyOverlay">
   <div class="magnify-inner">
     <button class="magnify-close" id="magnifyCloseBtn" title="關閉放大檢視">✕</button>
-    <div class="magnify-tools-slot" id="magnifyToolsSlot"></div>
+    <div class="magnify-tools-slot" id="magnifyToolsSlot">
+      <button class="action-btn eraser-default" id="paintBtn" style="margin-left:0">單格繪畫</button>
+    </div>
     <div class="magnify-canvas-slot" id="magnifyCanvasSlot"></div>
   </div>
 </div>

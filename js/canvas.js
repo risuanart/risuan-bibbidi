@@ -107,6 +107,42 @@ function stopEraseDrag(){
   document.removeEventListener('touchend', onEraseTouchEnd);
 }
 
+// 單格繪畫按住拖曳：滑過去的每個空格都畫上一個像素，方便一次畫一片
+let paintDragging = false;
+function paintAtPoint(clientX, clientY){
+  const pos = getCellFromPoint(clientX, clientY);
+  if(!pos) return;
+  const occupantId = cellGrid[pos.r][pos.c].dataset.itemId;
+  if(occupantId) return; // 已經有圖案的格子不重複疊加
+  placeItem(PAINT_DOT_GLYPH, pos.r, pos.c);
+}
+function onPaintMouseMove(e){ paintAtPoint(e.clientX, e.clientY); }
+function onPaintMouseUp(){ stopPaintDrag(); }
+function onPaintTouchMove(e){
+  const touch = e.touches[0];
+  if(!touch) return;
+  e.preventDefault();
+  paintAtPoint(touch.clientX, touch.clientY);
+}
+function onPaintTouchEnd(){ stopPaintDrag(); }
+function startPaintDrag(isTouch){
+  paintDragging = true;
+  if(isTouch){
+    document.addEventListener('touchmove', onPaintTouchMove, {passive:false});
+    document.addEventListener('touchend', onPaintTouchEnd);
+  } else {
+    document.addEventListener('mousemove', onPaintMouseMove);
+    document.addEventListener('mouseup', onPaintMouseUp);
+  }
+}
+function stopPaintDrag(){
+  paintDragging = false;
+  document.removeEventListener('mousemove', onPaintMouseMove);
+  document.removeEventListener('mouseup', onPaintMouseUp);
+  document.removeEventListener('touchmove', onPaintTouchMove);
+  document.removeEventListener('touchend', onPaintTouchEnd);
+}
+
 function showPreviewAt(hoverR, hoverC){
   clearPreview();
   if(!state.selectedGlyph) return;
@@ -355,25 +391,45 @@ function positionToolbar(id){
   if(!item){ deselectItem(); return; }
   const bbox = getItemGridBBox(item);
   if(!bbox){ deselectItem(); return; }
-  const anchorCell = (cellGrid[bbox.topRow] && cellGrid[bbox.topRow][bbox.rightCol]) || (cellGrid[item.r] && cellGrid[item.r][item.c]);
-  if(!anchorCell){ deselectItem(); return; }
-  const cRect = anchorCell.getBoundingClientRect();
+  const topLeftCell = cellGrid[bbox.topRow] && cellGrid[bbox.topRow][bbox.leftCol];
+  const bottomRightCell = cellGrid[bbox.bottomRow] && cellGrid[bbox.bottomRow][bbox.rightCol];
+  if(!topLeftCell || !bottomRightCell){ deselectItem(); return; }
   toolbarEl.style.display = 'flex';
 
-  // 用視窗座標定位（跟選取框一樣），並確保工具列一定落在畫面可見範圍內，
+  // 圖案完整的視窗座標範圍（不是只看單一格），左右都放不下時才能正確判斷要不要改貼上下方
+  const topLeftRect = topLeftCell.getBoundingClientRect();
+  const bottomRightRect = bottomRightCell.getBoundingClientRect();
+  const itemLeft = topLeftRect.left, itemRight = bottomRightRect.right;
+  const itemTop = topLeftRect.top, itemBottom = bottomRightRect.bottom;
+
+  // 用視窗座標定位，並確保工具列一定落在畫面可見範圍內，
   // 避免圖案太大或太靠邊時，翻轉/刪除按鍵被卡在捲軸外點不到
   const toolbarRect = toolbarEl.getBoundingClientRect();
   const toolbarWidth = toolbarRect.width || 120;
   const toolbarHeight = toolbarRect.height || 36;
   const margin = 8;
 
-  let left = cRect.right + 6;
+  let left = itemRight + 6;
   if(left + toolbarWidth > window.innerWidth - margin){
-    left = cRect.left - toolbarWidth - 6; // 右邊放不下，改貼到圖案左側
+    left = itemLeft - toolbarWidth - 6; // 右邊放不下，改貼到圖案左側
   }
-  left = Math.max(margin, Math.min(left, window.innerWidth - toolbarWidth - margin));
+  // 圖案左右都放不下時（例如圖案偏靠螢幕中間、畫面太窄），貼左右會被強制夾回螢幕內而蓋住圖案，
+  // 這種情況改貼到圖案上方/下方，才不會擋住圖案本身
+  if(left < margin || left + toolbarWidth > window.innerWidth - margin){
+    let top = itemBottom + 6;
+    if(top + toolbarHeight > window.innerHeight - margin){
+      top = itemTop - toolbarHeight - 6; // 下方放不下，改貼到圖案上方
+    }
+    top = Math.max(margin, Math.min(top, window.innerHeight - toolbarHeight - margin));
+    left = itemLeft + (itemRight - itemLeft) / 2 - toolbarWidth / 2; // 水平置中對齊圖案
+    left = Math.max(margin, Math.min(left, window.innerWidth - toolbarWidth - margin));
+    toolbarEl.style.left = left + 'px';
+    toolbarEl.style.top = top + 'px';
+    return;
+  }
 
-  let top = cRect.top;
+  left = Math.max(margin, Math.min(left, window.innerWidth - toolbarWidth - margin));
+  let top = itemTop;
   top = Math.max(margin, Math.min(top, window.innerHeight - toolbarHeight - margin));
 
   toolbarEl.style.left = left + 'px';
@@ -450,6 +506,11 @@ function buildGrid(resetItems = true){
     clearPreview();
     return;
   }
+  if(state.paintMode){
+    if(!occupantId) placeItem(PAINT_DOT_GLYPH, r, c);
+    clearPreview();
+    return;
+  }
   if(occupantId){
     return; // 已放置的圖案改由 mousedown/touchstart 處理選取與拖曳
   }
@@ -477,6 +538,12 @@ function buildGrid(resetItems = true){
       startEraseDrag(false);
       return;
     }
+    if(state.paintMode){
+      e.preventDefault();
+      if(!occupantId) placeItem(PAINT_DOT_GLYPH, r, c);
+      startPaintDrag(false);
+      return;
+    }
     if(!occupantId) return;
     e.preventDefault();
     startItemDrag(occupantId, e.clientX, e.clientY, false);
@@ -487,6 +554,11 @@ function buildGrid(resetItems = true){
     if(state.eraserMode){
       if(occupantId) eraseCellFromItem(occupantId, r, c);
       startEraseDrag(true);
+      return;
+    }
+    if(state.paintMode){
+      if(!occupantId) placeItem(PAINT_DOT_GLYPH, r, c);
+      startPaintDrag(true);
       return;
     }
     if(!occupantId) return;
@@ -551,6 +623,17 @@ function applyZoom(){
   zoomLabel.textContent = Math.round(zoom * 100) + "%";
   updateGridWrapperSize();
   refreshSelectionUI();
+  updateCanvasFitBadge();
+}
+
+// 畫布是否完整顯示（不用捲動就能看到全部）：比較 grid-wrapper 實際內容大小跟目前可視框大小，
+// 完整顯示才出現小提示，沒出現代表目前有裁切，擺放圖案時要注意可能超出可視範圍
+function updateCanvasFitBadge(){
+  const badge = document.getElementById("canvasFitBadge");
+  if(!badge) return;
+  const fullyVisible = gridWrapperEl.scrollWidth <= gridWrapperEl.clientWidth + 1 &&
+                        gridWrapperEl.scrollHeight <= gridWrapperEl.clientHeight + 1;
+  badge.classList.toggle("show", fullyVisible);
 }
 
 // transform:scale 只會讓格線視覺上縮放，格線本身的版面大小（也就是可捲動範圍）不會跟著變小，

@@ -60,8 +60,13 @@ function isCustomGlyph(glyph){
   return typeof glyph === "string" && glyph.startsWith("custom:");
 }
 
+// 「單格繪畫」畫出來的每一格，都是一個只佔1x1的獨立圖案，跟蓋印字母/圖片共用同一套
+// 圖案(item)系統，所以移動、翻轉、單格去除都直接沿用既有功能，不用另外寫一套
+const PAINT_DOT_GLYPH = "__paint_dot__";
+
 // 依照字元/自訂圖片 id 取得對應的點陣圖，統一入口讓其他函式不用分辨來源
 function getGlyphBitmap(glyph){
+  if(glyph === PAINT_DOT_GLYPH) return [[1]];
   if(isCustomGlyph(glyph)) return customBitmaps[glyph] || emptyBitmap(20);
   return charToBitmap(glyph, 20);
 }
