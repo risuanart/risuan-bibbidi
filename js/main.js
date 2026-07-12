@@ -268,3 +268,31 @@ renderSizeOptions();
 renderOrientation();
 initHangulComposer();
 buildGrid(!restoredFromSave);
+
+// ---- 簡介頁（首頁）↔ 排版頁 切換：同一個網頁內用顯示/隱藏切換，避免整頁 reload 閃爍 ----
+// 排版頁在還沒點「開始」前是 hidden 狀態，量到的寬度都會是 0，
+// 所以顯示出來的當下要重新跑一次 buildGrid() 把縮放比例、版面都重新算一次。
+const introScreenEl = document.getElementById("introScreen");
+const appScreenEl = document.getElementById("appScreen");
+
+function showLayoutScreen(pushHistory){
+  introScreenEl.style.display = "none";
+  appScreenEl.hidden = false;
+  buildGrid(false);
+  positionAllSegmentedSliders();
+  if(pushHistory) history.pushState({ screen: "layout" }, "", "#layout");
+}
+function showIntroScreen(){
+  appScreenEl.hidden = true;
+  introScreenEl.style.display = "flex";
+}
+
+document.getElementById("introStartBtn").onclick = ()=> showLayoutScreen(true);
+
+window.addEventListener("popstate", (e)=>{
+  if(e.state && e.state.screen === "layout") showLayoutScreen(false);
+  else showIntroScreen();
+});
+
+// 一律先從簡介頁開始，並把這個狀態記錄進瀏覽器歷史堆疊，這樣使用者按上一頁才有地方可以回
+history.replaceState({ screen: "intro" }, "", location.pathname + location.search);

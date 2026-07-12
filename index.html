@@ -11,7 +11,21 @@
 </head>
 <body>
 
-<div class="app">
+<div class="intro-screen" id="introScreen">
+  <div class="intro-card">
+    <h1>日宣bibbidi設計台</h1>
+    <p class="intro-tagline">把你的圖案，變成獨一無二的玻璃拼貼！</p>
+    <p class="intro-desc">選字母、數字、emoji 或上傳圖片，在格子畫布上自由排版設計，完成後輸出圖檔傳給我們，就能在課堂上直接動手完成你的專屬玻璃拼貼。</p>
+    <div class="intro-pricing">
+      <div class="intro-price-row"><span>A4・NT$1600</span><span class="intro-price-note">課程約3小時</span></div>
+      <div class="intro-price-row"><span>A3・NT$1900</span><span class="intro-price-note">課程約4小時</span></div>
+    </div>
+    <p class="intro-warning">＊尺寸請於開課前確認完成，開課前3天不接受更改尺寸</p>
+    <button class="intro-start-btn" id="introStartBtn">開始設計 →</button>
+  </div>
+</div>
+
+<div class="app" id="appScreen" hidden>
   <!-- 左側欄：標題、簡介、分類、圖案選單 -->
   <aside class="sidebar">
     <h1>日宣bibbidi設計台</h1>
