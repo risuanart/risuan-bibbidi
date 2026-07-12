@@ -3,8 +3,10 @@
   .app{
     flex-direction: column;   /* 左右並排 → 改成上下堆疊 */
   }
-  .sidebar{
-    width: 100%;              /* 側邊欄改成滿版寬 */
+  .app .sidebar{
+    width: 100%;              /* 側邊欄改成滿版寬。用 .app .sidebar 提高優先度，
+                                  避免被後面桌面版的 .sidebar{width:340px} 蓋掉（兩者選擇器優先度原本相同，
+                                  桌面版寫在後面會贏，導致手機版側邊欄一直卡在340px寬，右側留白） */
     max-height: 50vh;         /* 避免介紹文字太長把畫布擠到很下面 */
     overflow-y: auto;
   }
