@@ -251,6 +251,7 @@
     font-size:13px;color:#222;
   }
   .export-input.missing{ border-color:#c0392b; }
+  .export-field-hint{ font-size:11px;color:#8a8578;line-height:1.5;padding-left:2px; }
   #exportName{ width:110px; }
   #exportDate{ width:130px; padding:7px 8px; }
   .export-error{ color:#c0392b; font-size:13px; min-height:18px; }

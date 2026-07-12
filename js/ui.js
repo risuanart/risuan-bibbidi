@@ -258,10 +258,15 @@ function buildExportFilename(){
   const dateVal = document.getElementById("exportDate").value;
   const timeVal = document.getElementById("exportTime").value.replace(/:/g, "-");
   const nameVal = sanitizeForFilename(document.getElementById("exportName").value);
+  const operatorVal = sanitizeForFilename(document.getElementById("exportOperator").value.trim());
   const now = new Date();
   const pad = n => String(n).padStart(2, "0");
   const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  return `日宣bibbidi設計台＿${dateVal}＿${timeVal}＿${nameVal}＿${stamp}.png`;
+
+  const parts = ["日宣bibbidi設計台", dateVal, timeVal, nameVal];
+  if(operatorVal) parts.push(operatorVal); // 有填「實際操作者」時放進檔名，避免同名時分不出是誰的檔案
+  parts.push(stamp);
+  return parts.join("＿") + ".png";
 }
 
 function exportCanvasAsPng(){
