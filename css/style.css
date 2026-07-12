@@ -108,6 +108,17 @@
     max-width:420px;width:100%;text-align:center;
     display:flex;flex-direction:column;gap:10px;
   }
+  .intro-header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .intro-logo-lockup{ display:flex;align-items:center;gap:8px; }
+  .intro-logo-icon{ height:36px;width:auto;display:block; }
+  .intro-logo-word{ height:18px;width:auto;display:block; }
+  .intro-ig-link{
+    display:flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:50%;color:#555;flex-shrink:0;
+  }
+  .intro-ig-link:hover{ color:rgba(131,129,92,1); }
   .intro-card h1{
     font-family:"Noto Serif TC",Georgia,serif;font-weight:700;font-size:22px;margin:0;color:#222;
   }
