@@ -59,7 +59,8 @@
   }
   .tabs-wrap .tabs{
     display: none;            /* 預設收合，點擊收合鈕才展開 */
-    position: absolute;
+    position: fixed;          /* 用fixed而不是absolute，避免被.sidebar自己的max-height+overflow-y裁切
+                                  （跟畫布裡的翻轉/刪除功能鍵、選取框是同一種修法） */
     top: 44px;                /* 實際值會在展開時由 JS 依收合鈕實際高度重新計算，這裡只是保底預設值 */
     right: 26px;               /* 貼齊收合鈕右緣，只設 right 不設 left，寬度就會依內容自動縮放 */
     min-width: 96px;           /* 分類名稱只有一兩個字時，避免選單看起來太窄 */
@@ -160,11 +161,16 @@
   .tab{
     background:var(--pill-bg);border:none;color:var(--color-interactive);
     padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;
+    transition:background-color .15s ease;
   }
   .tab.active{background:var(--accent);color:var(--color-interactive);}
+  .tab:hover{background:var(--color-interactive);color:var(--color-warning);}
 
   .icon-grid{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    /* 用auto-fill+minmax，欄數依實際可用寬度自動調整，不寫死欄數，
+       手機/電腦共用同一條規則，兩邊排版一定會保持一致，不會各自改壞 */
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));
+    grid-auto-rows:min-content;gap:8px;
     overflow-y:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.15);
   }
   .hangul-composer{
@@ -175,24 +181,31 @@
     flex:1;min-width:0;background:color-mix(in srgb, var(--color-dark-base) 82%, white 18%);color:var(--sidebar-text);
     border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:5px 2px;font-size:12px;
   }
-  .hangul-preview-btn{ width:100%; }
+  .icon-btn.hangul-preview-btn{ width:100%; aspect-ratio:auto; } /* 取消.icon-btn的正方形設定（用複合選擇器確保優先度贏過.icon-btn），這格維持原本依內容決定高度 */
   .icon-btn{
     position:relative;
-    background:color-mix(in srgb, var(--color-dark-base) 82%, white 18%);border:2px solid transparent;border-radius:8px;color:var(--sidebar-text);
-    padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;
-    font-size:11px;cursor:pointer;
+    min-width:0;min-height:0;       /* 預設min-height:auto會讓內容需要的高度贏過aspect-ratio，這裡歸零 */
+    aspect-ratio:1/1;               /* 改成正方形，寬高一致 */
+    background:transparent;border:1px solid var(--color-interactive);border-radius:8px;
+    padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    font-size:11px;cursor:pointer;overflow:hidden;
+    transition:background-color .15s ease;
   }
-  .icon-btn .glyph-label{font-size:12px;color:var(--color-interactive);}
+  .icon-btn:hover{
+    background:var(--color-interactive);
+  }
+  .icon-btn .glyph-label{font-size:12px;color:var(--color-interactive);transition:color .15s ease;}
+  .icon-btn:hover .glyph-label{color:var(--color-warning);}
   .icon-delete-btn{
     position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
     background:rgba(var(--color-warning-rgb),0.75);color:#fff;font-size:12px;line-height:1;
     display:flex;align-items:center;justify-content:center;cursor:pointer;
   }
   .icon-delete-btn:hover{ background:color-mix(in srgb, var(--color-warning) 90%, white 10%); }
-.icon-preview{display:flex;align-items:center;justify-content:center;width:36px;height:36px;}
+.icon-preview{display:flex;align-items:center;justify-content:center;width:28px;height:28px;}
 .icon-preview svg{width:100%;height:100%;}
 .upload-btn{ border-style:dashed; border-color:rgba(255,255,255,.3); }
-.upload-btn .icon-preview{ font-size:22px; }
+.upload-btn .icon-preview{ font-size:18px; }
 .grid-wrapper{ position:relative; }
 .item-toolbar{
   position:fixed;
@@ -252,7 +265,7 @@
 
   /* ---------- 右側畫布區 ---------- */
   .canvas-area{
-    flex:1;padding:24px 32px;overflow:auto;
+    flex:1;padding:24px 32px;overflow:auto;position:relative;
     background-color:var(--color-interactive);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
     background-repeat:repeat;
@@ -417,11 +430,32 @@
 .magnify-canvas-slot .grid-wrapper{ margin:0 auto; }
 
 /* 畫布縮放範圍調整：完整顯示（不需要捲動）時才出現這個小提示，
-   沒出現就代表目前畫布沒有完整顯示，擺放圖案時要注意可能超出可視範圍 */
+   沒出現就代表目前畫布沒有完整顯示，擺放圖案時要注意可能超出可視範圍。
+   做成小布標籤的感覺，緊貼畫布外側正邊緣（完全不重疊到畫布本身）。
+   桌面版垂吊在畫布下緣（上緣平的像縫在邊上，下緣圓角）；
+   手機版鎖定在畫布左側正中間（.badge-side，右緣平的像縫在邊上，左緣圓角）。
+   位置用JS依grid-wrapper在同一個定位容器裡的offsetLeft/offsetTop計算（見 positionCanvasFitBadge），
+   用position:absolute（不是fixed）是刻意的：這樣捲動頁面時會跟著.canvas-area/.magnify-inner
+   的版面一起自然捲動，不用JS監聽scroll事件重新計算，才不會有位置跟不上、視覺上滑動的落差感 */
 .canvas-fit-badge{
-  display:none;position:absolute;bottom:6px;right:6px;
-  background:rgba(var(--color-dark-base-rgb),0.85);color:#fff;
-  font-size:11px;padding:4px 10px;border-radius:20px;pointer-events:none;
+  display:none;position:absolute;white-space:nowrap;
+  background:var(--color-dark-base);color:var(--color-light-text);
+  font-size:11px;padding:7px 12px 5px;border-radius:0 0 8px 8px;
+  box-shadow:0 3px 6px rgba(0,0,0,.3);
+  pointer-events:none;z-index:60;
+}
+.canvas-fit-badge::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:18px;height:3px;background:rgba(255,255,255,.35);border-radius:0 0 3px 3px;
+}
+.canvas-fit-badge.badge-side{
+  writing-mode:vertical-rl; /* 手機版畫布左邊可用空間很窄，改直式文字才塞得下 */
+  transform:translateY(-50%);
+  padding:10px 6px;border-radius:8px 0 0 8px;
+}
+.canvas-fit-badge.badge-side::before{
+  top:50%;left:auto;right:0;transform:translateY(-50%);
+  width:3px;height:18px;border-radius:3px 0 0 3px;
 }
 .canvas-fit-badge.show{ display:block; }
 

@@ -81,6 +81,10 @@
      <span class="current-price-label" id="currentPriceLabel"></span>
     </div>
     <div class="toolbar-row">
+     <button class="action-btn" id="undoBtn" style="margin-left:0" disabled>
+       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+       復原
+     </button>
      <button class="action-btn eraser-default" id="eraserBtn" style="margin-left:0">單格去除</button>
      <button class="action-btn danger-soft" id="clearBtn" style="margin-left:0">清空畫布</button>
      <button class="action-btn magnify-btn" id="magnifyBtn" style="margin-left:0">
@@ -108,8 +112,8 @@
 </div>
 </div>
       <div class="selection-frame" id="selectionFrame"></div>
-      <div class="canvas-fit-badge" id="canvasFitBadge">目前畫布完整顯示</div>
     </div>
+    <div class="canvas-fit-badge" id="canvasFitBadge">目前畫布完整顯示</div>
   </main>
 </div>
 
@@ -229,6 +233,7 @@
       <button class="action-btn eraser-default" id="paintBtn" style="margin-left:0">單格繪畫</button>
     </div>
     <div class="magnify-canvas-slot" id="magnifyCanvasSlot"></div>
+    <div class="canvas-fit-badge" id="canvasFitBadgeMagnify">目前畫布完整顯示</div>
   </div>
 </div>
 

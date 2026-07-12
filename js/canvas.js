@@ -340,6 +340,52 @@ function onDragTouchMove(e){
 }
 function onDragTouchEnd(){ finishDrag(); }
 
+// ---- 復原：記錄畫布上圖案清單(state.items)的快照，讓使用者可以一步一步回到修改前的狀態 ----
+// 只記錄items本身（不含paper/orientation等排版設定），因為復原的用意是「復原編輯動作」，
+// 不是回到不同的紙張設定
+const undoStack = [];
+const MAX_UNDO_STEPS = 30;
+
+function snapshotItems(){
+  const items = {};
+  Object.keys(state.items).forEach(id=>{
+    const it = state.items[id];
+    const copy = { glyph: it.glyph, r: it.r, c: it.c, flipH: it.flipH, flipV: it.flipV };
+    if(it.holes && it.holes.size) copy.holes = Array.from(it.holes);
+    items[id] = copy;
+  });
+  return { items, nextItemId: state.nextItemId }; // 一併記錄nextItemId，避免清空畫布後復原時跟新放的圖案撞ID
+}
+
+// 每個會改變畫面上圖案的動作，執行前都要呼叫這個，把「動作前」的狀態存起來
+function pushUndo(){
+  undoStack.push(snapshotItems());
+  if(undoStack.length > MAX_UNDO_STEPS) undoStack.shift();
+  updateUndoBtnState();
+}
+
+function undoLastAction(){
+  if(!undoStack.length) return;
+  const prev = undoStack.pop();
+  state.items = {};
+  Object.keys(prev.items).forEach(id=>{
+    const it = prev.items[id];
+    const restored = { glyph: it.glyph, r: it.r, c: it.c, flipH: it.flipH, flipV: it.flipV };
+    if(it.holes && it.holes.length) restored.holes = new Set(it.holes);
+    state.items[id] = restored;
+  });
+  state.nextItemId = prev.nextItemId;
+  deselectItem();
+  paintAll();
+  scheduleAutosave();
+  updateUndoBtnState();
+}
+
+function updateUndoBtnState(){
+  const btn = document.getElementById("undoBtn");
+  if(btn) btn.disabled = undoStack.length === 0;
+}
+
 function placeItem(glyph, r, c){
   const id = "item" + (state.nextItemId++);
   state.items[id] = { glyph, r, c, flipH:false, flipV:false };
@@ -502,12 +548,12 @@ function buildGrid(resetItems = true){
   cell.onclick = () => {
   const occupantId = cell.dataset.itemId;
   if(state.eraserMode){
-    if(occupantId) eraseCellFromItem(occupantId, r, c);
+    if(occupantId){ pushUndo(); eraseCellFromItem(occupantId, r, c); }
     clearPreview();
     return;
   }
   if(state.paintMode){
-    if(!occupantId) placeItem(PAINT_DOT_GLYPH, r, c);
+    if(!occupantId){ pushUndo(); placeItem(PAINT_DOT_GLYPH, r, c); }
     clearPreview();
     return;
   }
@@ -525,6 +571,7 @@ function buildGrid(resetItems = true){
     return; // 超出畫布邊界，不允許蓋章
   }
   deselectItem();
+  pushUndo();
   placeItem(state.selectedGlyph, originR, originC);
   state.selectedGlyph = null;
   renderIcons();
@@ -534,36 +581,38 @@ function buildGrid(resetItems = true){
     const occupantId = cell.dataset.itemId;
     if(state.eraserMode){
       e.preventDefault();
-      if(occupantId) eraseCellFromItem(occupantId, r, c);
+      if(occupantId){ pushUndo(); eraseCellFromItem(occupantId, r, c); }
       startEraseDrag(false);
       return;
     }
     if(state.paintMode){
       e.preventDefault();
-      if(!occupantId) placeItem(PAINT_DOT_GLYPH, r, c);
+      if(!occupantId){ pushUndo(); placeItem(PAINT_DOT_GLYPH, r, c); }
       startPaintDrag(false);
       return;
     }
     if(!occupantId) return;
     e.preventDefault();
+    pushUndo();
     startItemDrag(occupantId, e.clientX, e.clientY, false);
   };
   cell.addEventListener('touchstart', (e) => {
     if(e.touches.length > 1) return; // 雙指觸控是縮放手勢，不要當成拖曳圖案
     const occupantId = cell.dataset.itemId;
     if(state.eraserMode){
-      if(occupantId) eraseCellFromItem(occupantId, r, c);
+      if(occupantId){ pushUndo(); eraseCellFromItem(occupantId, r, c); }
       startEraseDrag(true);
       return;
     }
     if(state.paintMode){
-      if(!occupantId) placeItem(PAINT_DOT_GLYPH, r, c);
+      if(!occupantId){ pushUndo(); placeItem(PAINT_DOT_GLYPH, r, c); }
       startPaintDrag(true);
       return;
     }
     if(!occupantId) return;
     const touch = e.touches[0];
     if(!touch) return;
+    pushUndo();
     startItemDrag(occupantId, touch.clientX, touch.clientY, true);
   }, {passive:true});
 
@@ -629,11 +678,38 @@ function applyZoom(){
 // 畫布是否完整顯示（不用捲動就能看到全部）：比較 grid-wrapper 實際內容大小跟目前可視框大小，
 // 完整顯示才出現小提示，沒出現代表目前有裁切，擺放圖案時要注意可能超出可視範圍
 function updateCanvasFitBadge(){
-  const badge = document.getElementById("canvasFitBadge");
-  if(!badge) return;
   const fullyVisible = gridWrapperEl.scrollWidth <= gridWrapperEl.clientWidth + 1 &&
                         gridWrapperEl.scrollHeight <= gridWrapperEl.clientHeight + 1;
-  badge.classList.toggle("show", fullyVisible);
+  // 一般畫布跟放大檢視各有自己的一份提示（放大檢視開啟時畫布會搬進去，
+  // 兩者不會同時顯示，但兩個都要跟著同一個判斷結果切換）
+  ["canvasFitBadge", "canvasFitBadgeMagnify"].forEach(elId=>{
+    const badge = document.getElementById(elId);
+    if(badge) badge.classList.toggle("show", fullyVisible);
+  });
+  positionCanvasFitBadge();
+}
+
+// 貼著畫布外側邊緣，完全不蓋到畫布本身，像布標籤縫在邊邊上。
+// 桌面版貼在畫布下緣靠右；手機版（螢幕較窄，下面通常沒有太多版面可以再放東西）鎖定在畫布左側正中間。
+// 用 offsetLeft/offsetTop（相對於最近的定位祖先.canvas-area或.magnify-inner）而不是
+// getBoundingClientRect()，這樣搭配CSS的position:absolute，捲動頁面時會自然跟著版面捲動，
+// 不需要額外監聽scroll事件重算位置，才不會有跟不上、視覺上滑動的落差感
+function positionCanvasFitBadge(){
+  const isMobile = window.innerWidth <= 900;
+  ["canvasFitBadge", "canvasFitBadgeMagnify"].forEach(elId=>{
+    const badge = document.getElementById(elId);
+    if(!badge) return;
+    badge.classList.toggle("badge-side", isMobile);
+    if(isMobile){
+      const badgeWidth = badge.offsetWidth || 28;
+      badge.style.top = (gridWrapperEl.offsetTop + gridWrapperEl.offsetHeight/2) + "px";
+      badge.style.left = (gridWrapperEl.offsetLeft - badgeWidth) + "px";
+    } else {
+      const badgeWidth = badge.offsetWidth || 112;
+      badge.style.top = (gridWrapperEl.offsetTop + gridWrapperEl.offsetHeight) + "px"; // 緊貼畫布下緣，完全不重疊
+      badge.style.left = (gridWrapperEl.offsetLeft + gridWrapperEl.offsetWidth - badgeWidth - 16) + "px";
+    }
+  });
 }
 
 // transform:scale 只會讓格線視覺上縮放，格線本身的版面大小（也就是可捲動範圍）不會跟著變小，

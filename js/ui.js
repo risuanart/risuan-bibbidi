@@ -20,14 +20,19 @@ function renderTabs(){
 }
 
 // ---- 手機版分類收合選單：收合鈕貼在標題右側，預設收合，點擊才展開，選擇分類後自動收合 ----
-// 收合鈕跟展開選單都用絕對定位貼在 .sidebar 上，這裡依收合鈕實際高度算出選單該貼在哪個高度，
-// 這樣不管標題文字換行與否、鈕的實際大小是多少，選單都會準確貼在收合鈕正下方。
+// 收合鈕用絕對定位貼在 .sidebar 上，展開選單則用 position:fixed（以螢幕為基準，不會被
+// .sidebar 自己的 max-height+overflow-y 裁切）。選單高度依「收合鈕下緣到側邊欄(咖啡色底)下緣」
+// 之間實際剩餘的空間動態計算，這樣選單一定會留在咖啡色範圍內，不會蓋到下面的畫布區，
+// 分類太多看不完時則交給選單自己的 overflow-y:auto 捲動瀏覽。
 function positionTabsDropdown(){
   const toggleBtn = document.getElementById("tabsToggle");
   const sidebar = document.querySelector(".sidebar");
   const toggleRect = toggleBtn.getBoundingClientRect();
   const sidebarRect = sidebar.getBoundingClientRect();
-  tabsEl.style.top = (toggleRect.bottom - sidebarRect.top + 6) + "px";
+  const top = toggleRect.bottom + 6;
+  const margin = 8;
+  tabsEl.style.top = top + "px";
+  tabsEl.style.maxHeight = Math.max(60, sidebarRect.bottom - top - margin) + "px";
 }
 
 function toggleTabsDropdown(){
@@ -385,12 +390,13 @@ function finishExportCanvas(canvas){
 
 // ---- 使用說明：依照目前實際操作方式寫成一步一步的教學，搭配簡單的 emoji 圖示 ----
 const helpSteps = [
-  { icon:"🎨", title:"1. 選擇圖案", desc:"從左側選一個分類（大寫、小寫、數字、花園、森林、海洋、其他），再點選想要使用的圖案。" },
+  { icon:"🎨", title:"1. 選擇圖案", desc:"從左側（手機版點右上角「分類」鈕）選一個分類，再點選想要使用的圖案。" },
   { icon:"👆", title:"2. 放置圖案", desc:"選好圖案後，到右邊的格子畫布上點一下，圖案就會蓋印上去。" },
-  { icon:"✋", title:"3. 選取與移動", desc:"點一下已經放置好的圖案可以選取它（會出現框線與霧面提示）；按住並拖曳，可以移動到新的位置。" },
-  { icon:"🔄", title:"4. 翻轉與刪除", desc:"選取圖案後，旁邊會出現小工具列，可以水平翻轉、垂直翻轉，或刪除這個圖案。" },
-  { icon:"🔍", title:"5. 調整畫布", desc:"可以切換 A4／A3 紙張尺寸、直式／橫式，並用 ＋／－ 按鈕（手機可用雙指）縮放畫布大小。" },
-  { icon:"📤", title:"6. 輸出成品", desc:"拼貼完成後，記得填寫預約課程日期、時間與姓名，再點「輸出圖檔」下載成品圖片，方便我們依日期時間分類收件。" }
+  { icon:"✋", title:"3. 選取、移動與微調", desc:"點一下已經放置好的圖案可以選取它；按住並拖曳可以移動到新的位置。選取後旁邊會出現工具列，可以上下左右微調一格、水平/垂直翻轉，或刪除這個圖案。" },
+  { icon:"🧹", title:"4. 單格去除與復原", desc:"開啟「單格去除」可以一格一格清掉圖案的局部，不用整個刪除重蓋；操作錯了也可以按「復原」回到上一步。" },
+  { icon:"🔍", title:"5. 放大檢視", desc:"手機排版空間有限時，可以點「放大檢視」用更大的畫面檢視、微調圖案位置，裡面也可以用單格去除，或用「單格繪畫」直接手繪單一像素。" },
+  { icon:"📐", title:"6. 調整畫布尺寸", desc:"可以切換 A4／A3 紙張尺寸、直式／橫式，並用 ＋／－ 按鈕（手機可用雙指）縮放畫布大小；畫布完整顯示、不需要捲動時，旁邊會出現小標籤提醒。" },
+  { icon:"📤", title:"7. 輸出成品", desc:"拼貼完成後，記得填寫預約課程日期、時間與姓名，再點「輸出圖檔」下載成品圖片，方便我們依日期時間分類收件。" }
 ];
 let helpStepIndex = 0;
 

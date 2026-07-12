@@ -7,8 +7,8 @@
 :root{
   /* 主色：品牌橄欖綠，取自畫室Logo。之後會取代目前偏灰的橄欖色（rgba(131,129,92,...)），
      用在主要按鈕、選取狀態、強調用途。 */
-  --color-primary: #7d823d;
-  --color-primary-rgb: 125,130,61; /* 給需要調整透明度的地方用，例如 rgba(var(--color-primary-rgb),0.85) */
+  --color-primary: #595F34;
+  --color-primary-rgb: 89,95,52; /* 給需要調整透明度的地方用，例如 rgba(var(--color-primary-rgb),0.85) */
 
   /* 深色底：取代原本的深灰選字區塊（目前是 #3a3a34）。 */
   --color-dark-base: #231815;

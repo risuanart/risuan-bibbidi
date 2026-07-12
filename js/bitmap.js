@@ -193,6 +193,7 @@ function confirmResPicker(){
   } else if(resPickerContext.mode === "adjust"){
     const item = state.items[resPickerContext.itemId];
     if(item){
+      pushUndo();
       // 調整解析度後，讓圖案的中心點維持在原本的位置，不會因為格數變多變少而跳位置
       const oldBitmap = getItemBitmap(item);
       const oldBBox = getGlyphBBox(oldBitmap);

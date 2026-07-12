@@ -47,6 +47,7 @@ document.getElementById("flipHBtn").onclick = (e)=>{
   e.stopPropagation();
   const id = state.selectedItemId;
   if(!id) return;
+  pushUndo();
   state.items[id].flipH = !state.items[id].flipH;
   paintAll();
   positionToolbar(id);
@@ -57,6 +58,7 @@ document.getElementById("flipVBtn").onclick = (e)=>{
   e.stopPropagation();
   const id = state.selectedItemId;
   if(!id) return;
+  pushUndo();
   state.items[id].flipV = !state.items[id].flipV;
   paintAll();
   positionToolbar(id);
@@ -67,6 +69,7 @@ document.getElementById("deleteItemBtn").onclick = (e)=>{
   e.stopPropagation();
   const id = state.selectedItemId;
   if(!id) return;
+  pushUndo();
   deleteItem(id);
 };
 document.getElementById("resizeItemBtn").onclick = (e)=>{
@@ -85,6 +88,7 @@ function bindNudgeBtn(btnId, dr, dc){
     e.stopPropagation();
     const id = state.selectedItemId;
     if(!id) return;
+    pushUndo();
     nudgeItem(id, dr, dc);
   };
 }
@@ -102,6 +106,7 @@ document.addEventListener("keydown", (e)=>{
   const delta = deltas[e.key];
   if(!delta) return;
   e.preventDefault();
+  pushUndo();
   nudgeItem(state.selectedItemId, delta[0], delta[1]);
 });
 
@@ -145,6 +150,8 @@ gridWrapperEl.addEventListener('touchend', (e)=>{
 }, {passive:true});
 gridWrapperEl.addEventListener('touchcancel', ()=>{ pinchState = null; }, {passive:true});
 
+document.getElementById("undoBtn").onclick = undoLastAction;
+
 document.getElementById("eraserBtn").onclick = ()=>{
   state.eraserMode = !state.eraserMode;
   document.getElementById("eraserBtn").classList.toggle("eraser-active", state.eraserMode);
@@ -174,6 +181,7 @@ document.getElementById("clearBtn").onclick = ()=>{
 };
 document.getElementById("confirmClearCancelBtn").onclick = closeConfirmClear;
 document.getElementById("confirmClearOkBtn").onclick = ()=>{
+  pushUndo();
   closeConfirmClear();
   buildGrid();
 };
@@ -312,7 +320,7 @@ history.replaceState({ screen: "intro" }, "", location.pathname + location.searc
 
 // ---- 任務19方向B：手機版「放大檢視」----
 // 單純是「用比較大的畫面檢視/微調已排好的圖案」，不能在裡面選新圖案、不能調整縮放、
-// 也不能清空畫布，只留單格去除。把單格去除鈕跟畫布直接搬進彈窗（不是複製一份新的），
+// 也不能清空畫布，只留復原、單格去除。把這兩個按鈕跟畫布直接搬進彈窗（不是複製一份新的），
 // 操作的還是同一份DOM/同一個state，關閉時搬回原本位置，不會有彈窗內外資料兜不起來的問題。
 const magnifyBtnEl = document.getElementById("magnifyBtn");
 const magnifyCloseBtnEl = document.getElementById("magnifyCloseBtn");
@@ -321,10 +329,12 @@ const magnifyToolsSlotEl = document.getElementById("magnifyToolsSlot");
 const magnifyCanvasSlotEl = document.getElementById("magnifyCanvasSlot");
 
 const canvasAreaEl = document.querySelector(".canvas-area");
+const undoBtnEl = document.getElementById("undoBtn");
 const eraserBtnEl = document.getElementById("eraserBtn");
 const clearBtnEl = document.getElementById("clearBtn"); // 不會搬進放大檢視，只拿來當作單格去除鈕搬回原位時的錨點
 
 function openMagnify(){
+  magnifyToolsSlotEl.appendChild(undoBtnEl);
   magnifyToolsSlotEl.appendChild(eraserBtnEl);
   magnifyCanvasSlotEl.appendChild(gridWrapperEl);
   magnifyOverlayEl.classList.add("open");
@@ -338,6 +348,7 @@ function openMagnify(){
 function closeMagnify(){
   exitPaintMode(); // 單格繪畫只存在放大檢視裡，離開就強制關閉，避免留著跑到外面的畫布繼續生效
   clearBtnEl.parentElement.insertBefore(eraserBtnEl, clearBtnEl); // 單格去除搬回清空畫布前面，恢復原本順序
+  eraserBtnEl.parentElement.insertBefore(undoBtnEl, eraserBtnEl); // 復原搬回單格去除前面，恢復原本順序
   canvasAreaEl.appendChild(gridWrapperEl); // 畫布搬回畫布區最後面
   magnifyOverlayEl.classList.remove("open");
   document.body.style.overflow = "";
