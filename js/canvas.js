@@ -529,7 +529,6 @@ function nudgeItem(id, dr, dc){
 
 let zoom = 1;
 const zoomLabel = document.getElementById("zoomLabel");
-const canvasAreaEl = document.querySelector(".canvas-area");
 const CANVAS_FIT_MARGIN = 16; // 可視區域左右各留的安全邊距(px)
 const MIN_ZOOM = 0.15; // 手動 -/+ 縮放的下限，放寬到能容納 A3 橫式在窄螢幕手機也能縮到完整顯示
 const MAX_ZOOM = 1;
@@ -539,7 +538,9 @@ const MAX_ZOOM = 1;
 function computeFitZoom(){
   const naturalWidth = gridCols * CELL_PX;
   if(naturalWidth <= 0) return MAX_ZOOM;
-  const availWidth = canvasAreaEl.clientWidth - CANVAS_FIT_MARGIN * 2;
+  // 用 grid-wrapper 目前實際所在的容器寬度來算，而不是寫死 canvasAreaEl，
+  // 這樣「放大檢視」把畫布搬進彈窗時，也能照彈窗的寬度重新計算縮放比例
+  const availWidth = gridWrapperEl.parentElement.clientWidth - CANVAS_FIT_MARGIN * 2;
   const fit = availWidth / naturalWidth;
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fit));
 }

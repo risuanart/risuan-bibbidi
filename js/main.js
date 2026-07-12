@@ -296,3 +296,56 @@ window.addEventListener("popstate", (e)=>{
 
 // 一律先從簡介頁開始，並把這個狀態記錄進瀏覽器歷史堆疊，這樣使用者按上一頁才有地方可以回
 history.replaceState({ screen: "intro" }, "", location.pathname + location.search);
+
+// ---- 任務19方向B：手機版「放大檢視」----
+// 把選圖案面板（.sidebar）跟畫布相關元素直接搬進彈窗（不是複製一份新的），
+// 操作的還是同一份DOM/同一個state，關閉時搬回原本位置，不會有彈窗內外資料兜不起來的問題。
+const magnifyBtnEl = document.getElementById("magnifyBtn");
+const magnifyCloseBtnEl = document.getElementById("magnifyCloseBtn");
+const magnifyOverlayEl = document.getElementById("magnifyOverlay");
+const magnifyPanelSlotEl = document.getElementById("magnifyPanelSlot");
+const magnifyToolsSlotEl = document.getElementById("magnifyToolsSlot");
+const magnifyCanvasSlotEl = document.getElementById("magnifyCanvasSlot");
+
+const sidebarEl = document.querySelector(".sidebar");
+const appEl = document.querySelector(".app");
+const canvasAreaEl = document.querySelector(".canvas-area");
+const orientationRowEl = document.getElementById("orientationRow");
+const zoomControlEl = document.querySelector(".zoom-control");
+const eraserBtnEl = document.getElementById("eraserBtn");
+const clearBtnEl = document.getElementById("clearBtn");
+const exportBtnEl = document.getElementById("exportBtn");
+
+function openMagnify(){
+  magnifyPanelSlotEl.appendChild(sidebarEl);
+  magnifyToolsSlotEl.appendChild(zoomControlEl);
+  magnifyToolsSlotEl.appendChild(eraserBtnEl);
+  magnifyToolsSlotEl.appendChild(clearBtnEl);
+  magnifyCanvasSlotEl.appendChild(gridWrapperEl);
+  magnifyOverlayEl.classList.add("open");
+  document.body.style.overflow = "hidden";
+  requestAnimationFrame(()=>{
+    zoom = computeFitZoom();
+    applyZoom();
+  });
+}
+
+function closeMagnify(){
+  appEl.insertBefore(sidebarEl, canvasAreaEl); // 面板搬回畫布區前面，恢復原本左右並排的順序
+  orientationRowEl.appendChild(zoomControlEl); // 縮放控制搬回尺寸/方向那一列的最後面
+  exportBtnEl.parentElement.insertBefore(eraserBtnEl, exportBtnEl); // 單格去除、清空畫布搬回輸出圖檔按鈕前面，維持原本順序
+  exportBtnEl.parentElement.insertBefore(clearBtnEl, exportBtnEl);
+  canvasAreaEl.appendChild(gridWrapperEl); // 畫布搬回畫布區最後面
+  magnifyOverlayEl.classList.remove("open");
+  document.body.style.overflow = "";
+  requestAnimationFrame(()=>{
+    zoom = computeFitZoom();
+    applyZoom();
+  });
+}
+
+magnifyBtnEl.onclick = openMagnify;
+magnifyCloseBtnEl.onclick = closeMagnify;
+magnifyOverlayEl.addEventListener("click", (e)=>{
+  if(e.target.id === "magnifyOverlay") closeMagnify(); // 點背景霧面等同關閉
+});

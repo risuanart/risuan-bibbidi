@@ -82,6 +82,10 @@
     <div class="toolbar-row">
      <button class="action-btn eraser-default" id="eraserBtn" style="margin-left:0">單格去除</button>
      <button class="action-btn danger-soft" id="clearBtn" style="margin-left:0">清空畫布</button>
+     <button class="action-btn magnify-btn" id="magnifyBtn" style="margin-left:0">
+       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+       放大檢視
+     </button>
      <button class="action-btn primary" id="exportBtn" style="margin-left:0">輸出圖檔</button>
     </div>
     <div class="grid-wrapper">
@@ -208,6 +212,17 @@
     <h3 class="help-title" style="text-align:center;margin-top:0;">輸出完成！</h3>
     <p class="help-desc" style="text-align:center;">還沒加畫室的 LINE 好友嗎？先加起來，之後圖檔才有地方傳給我們喔。</p>
     <a class="action-btn" id="joinLineBtn" href="#" target="_blank" rel="noopener" style="width:100%;margin-left:0;text-decoration:none;display:block;text-align:center;box-sizing:border-box;">加入畫室LINE好友</a>
+  </div>
+</div>
+
+<!-- 任務19方向B：放大檢視彈窗。開啟時會把選圖案面板跟畫布（含單格去除/清空畫布/縮放）
+     搬進下面這幾個 slot 裡，關閉時再搬回原本的位置，操作的是同一份DOM/狀態，不會有資料不同步的問題 -->
+<div class="magnify-overlay" id="magnifyOverlay">
+  <div class="magnify-inner">
+    <button class="magnify-close" id="magnifyCloseBtn" title="關閉放大檢視">✕</button>
+    <div class="magnify-tools-slot" id="magnifyToolsSlot"></div>
+    <div class="magnify-panel-slot" id="magnifyPanelSlot"></div>
+    <div class="magnify-canvas-slot" id="magnifyCanvasSlot"></div>
   </div>
 </div>
 

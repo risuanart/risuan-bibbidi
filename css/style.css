@@ -379,3 +379,35 @@
 .cell[data-item-id]:active{ cursor: grabbing; }
 .flip-icon-vertical{ transform: rotate(90deg); }
 .grid-wrapper.eraser-mode .cell{ cursor: crosshair; }
+
+/* ---------- 任務19方向B：手機版「放大檢視」彈窗 ---------- */
+.magnify-btn{ display:none; align-items:center; gap:6px; }
+@media (max-width:900px){
+  .magnify-btn{ display:inline-flex; }
+}
+.magnify-overlay{
+  display:none;position:fixed;inset:0;background:rgba(20,18,15,.7);
+  z-index:800;padding:10px;
+}
+.magnify-overlay.open{ display:flex; }
+.magnify-inner{
+  flex:1;min-width:0;background:var(--main-bg);border-radius:16px;
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.magnify-close{
+  position:absolute;top:10px;right:10px;z-index:5;width:34px;height:34px;border-radius:50%;
+  background:#222;color:#fff;border:none;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.magnify-tools-slot{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 54px 6px 14px;
+}
+.magnify-panel-slot{ flex-shrink:0;max-height:38vh;overflow-y:auto; }
+.magnify-canvas-slot{
+  flex:1;min-height:0;overflow:auto;padding:10px 14px 14px;
+}
+/* 面板搬進彈窗後已經不在 .app 底下，任務15修的 .app .sidebar 選不到它（連同max-height/overflow-y都選不到），
+   這裡補上讓面板寬度維持滿版；高度限制改由 .magnify-panel-slot 自己控制（見上面那行） */
+.magnify-overlay .sidebar{ width:100%;max-height:none; }
+.magnify-canvas-slot .grid-wrapper{ margin:0 auto; }
