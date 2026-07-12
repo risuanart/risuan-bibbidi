@@ -147,6 +147,8 @@
   .sidebar{
     width:340px;flex-shrink:0;background:var(--sidebar-bg);color:var(--sidebar-text);
     padding:28px 26px;display:flex;flex-direction:column;
+    color-scheme:dark; /* 側邊欄底色變深之後，瀏覽器原生捲軸的淺色滑塊對比太明顯，
+                           用這個屬性讓捲軸自動改用適合深色底的樣式，不用另外刻webkit捲軸樣式 */
   }
   .sidebar h1{font-family:"Noto Serif TC",Georgia,serif;font-weight:700;font-size:20px;margin:0 0 8px;color:var(--color-interactive);}
   .sidebar p{font-size:12px;line-height:1.6;opacity:.9;margin:0 0 10px;color:var(--color-interactive);}
@@ -411,3 +413,33 @@
    這裡補上讓面板寬度維持滿版；高度限制改由 .magnify-panel-slot 自己控制（見上面那行） */
 .magnify-overlay .sidebar{ width:100%;max-height:none; }
 .magnify-canvas-slot .grid-wrapper{ margin:0 auto; }
+
+/* 放大檢視實測回饋：選圖案面板預設應該整個收起來（只留分類鈕），
+   點下去才展開佔滿整個放大檢視區域，選好圖案後自動收合，把畫布空間讓出來 */
+.magnify-overlay .sidebar > h1,
+.magnify-overlay .sidebar > p,
+.magnify-overlay .sidebar > .hangul-composer,
+.magnify-overlay .sidebar .icon-grid{
+  display:none;
+}
+.magnify-overlay .sidebar.picker-open{
+  position:absolute;inset:0;z-index:30;
+  background:var(--sidebar-bg);padding:16px;overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.magnify-overlay .sidebar.picker-open > h1,
+.magnify-overlay .sidebar.picker-open > p,
+.magnify-overlay .sidebar.picker-open > .hangul-composer{
+  display:block;
+}
+.magnify-overlay .sidebar.picker-open .icon-grid{
+  display:grid;overflow-y:auto;
+}
+.magnify-overlay .sidebar.picker-open .tabs-wrap .tabs-toggle{
+  position:static;margin-bottom:10px;
+}
+.magnify-overlay .sidebar.picker-open .tabs-wrap .tabs{
+  position:static;display:flex;flex-wrap:wrap;width:auto;max-width:none;
+  min-width:0;max-height:none;overflow:visible;background:none;box-shadow:none;
+  padding:0;margin-bottom:12px;
+}
