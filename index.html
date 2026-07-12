@@ -215,13 +215,14 @@
   </div>
 </div>
 
-<!-- 任務19方向B：放大檢視彈窗。開啟時會把選圖案面板跟畫布（含單格去除/清空畫布/縮放）
-     搬進下面這幾個 slot 裡，關閉時再搬回原本的位置，操作的是同一份DOM/狀態，不會有資料不同步的問題 -->
+<!-- 任務19方向B：放大檢視彈窗。單純是「用比較大的畫面檢視/微調已排好的圖案」，
+     不能在裡面選新圖案、不能調整縮放、也不能清空畫布，只留單格去除。
+     開啟時把單格去除鈕跟畫布搬進下面這幾個 slot，關閉時再搬回原本位置，
+     操作的是同一份DOM/狀態，不會有資料不同步的問題 -->
 <div class="magnify-overlay" id="magnifyOverlay">
   <div class="magnify-inner">
     <button class="magnify-close" id="magnifyCloseBtn" title="關閉放大檢視">✕</button>
     <div class="magnify-tools-slot" id="magnifyToolsSlot"></div>
-    <div class="magnify-panel-slot" id="magnifyPanelSlot"></div>
     <div class="magnify-canvas-slot" id="magnifyCanvasSlot"></div>
   </div>
 </div>

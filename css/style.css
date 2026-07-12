@@ -382,7 +382,10 @@
 .flip-icon-vertical{ transform: rotate(90deg); }
 .grid-wrapper.eraser-mode .cell{ cursor: crosshair; }
 
-/* ---------- 任務19方向B：手機版「放大檢視」彈窗 ---------- */
+/* ---------- 任務19方向B：手機版「放大檢視」彈窗 ----------
+   用途單純只是「用比較大的畫面檢視/微調已經排好的圖案」，不能在裡面選新圖案、
+   不能調整縮放（固定用能撐滿彈窗的最大尺寸顯示）、也不能清空畫布，
+   只留單格去除，跟移動圖案要用的操作（拖曳、翻轉、刪除、上下左右微調，這些都在item-toolbar裡本來就有）。 */
 .magnify-btn{ display:none; align-items:center; gap:6px; }
 @media (max-width:900px){
   .magnify-btn{ display:inline-flex; }
@@ -403,43 +406,10 @@
 }
 .magnify-tools-slot{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  padding:14px 54px 6px 14px;
+  padding:14px 54px 10px 14px;
 }
-.magnify-panel-slot{ flex-shrink:0;max-height:38vh;overflow-y:auto; }
 .magnify-canvas-slot{
   flex:1;min-height:0;overflow:auto;padding:10px 14px 14px;
+  display:flex;align-items:flex-start;justify-content:center;
 }
-/* 面板搬進彈窗後已經不在 .app 底下，任務15修的 .app .sidebar 選不到它（連同max-height/overflow-y都選不到），
-   這裡補上讓面板寬度維持滿版；高度限制改由 .magnify-panel-slot 自己控制（見上面那行） */
-.magnify-overlay .sidebar{ width:100%;max-height:none; }
 .magnify-canvas-slot .grid-wrapper{ margin:0 auto; }
-
-/* 放大檢視實測回饋：選圖案面板預設應該整個收起來（只留分類鈕），
-   點下去才展開佔滿整個放大檢視區域，選好圖案後自動收合，把畫布空間讓出來 */
-.magnify-overlay .sidebar > h1,
-.magnify-overlay .sidebar > p,
-.magnify-overlay .sidebar > .hangul-composer,
-.magnify-overlay .sidebar .icon-grid{
-  display:none;
-}
-.magnify-overlay .sidebar.picker-open{
-  position:absolute;inset:0;z-index:30;
-  background:var(--sidebar-bg);padding:16px;overflow-y:auto;
-  display:flex;flex-direction:column;
-}
-.magnify-overlay .sidebar.picker-open > h1,
-.magnify-overlay .sidebar.picker-open > p,
-.magnify-overlay .sidebar.picker-open > .hangul-composer{
-  display:block;
-}
-.magnify-overlay .sidebar.picker-open .icon-grid{
-  display:grid;overflow-y:auto;
-}
-.magnify-overlay .sidebar.picker-open .tabs-wrap .tabs-toggle{
-  position:static;margin-bottom:10px;
-}
-.magnify-overlay .sidebar.picker-open .tabs-wrap .tabs{
-  position:static;display:flex;flex-wrap:wrap;width:auto;max-width:none;
-  min-width:0;max-height:none;overflow:visible;background:none;box-shadow:none;
-  padding:0;margin-bottom:12px;
-}

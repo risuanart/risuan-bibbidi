@@ -298,29 +298,21 @@ window.addEventListener("popstate", (e)=>{
 history.replaceState({ screen: "intro" }, "", location.pathname + location.search);
 
 // ---- 任務19方向B：手機版「放大檢視」----
-// 把選圖案面板（.sidebar）跟畫布相關元素直接搬進彈窗（不是複製一份新的），
+// 單純是「用比較大的畫面檢視/微調已排好的圖案」，不能在裡面選新圖案、不能調整縮放、
+// 也不能清空畫布，只留單格去除。把單格去除鈕跟畫布直接搬進彈窗（不是複製一份新的），
 // 操作的還是同一份DOM/同一個state，關閉時搬回原本位置，不會有彈窗內外資料兜不起來的問題。
 const magnifyBtnEl = document.getElementById("magnifyBtn");
 const magnifyCloseBtnEl = document.getElementById("magnifyCloseBtn");
 const magnifyOverlayEl = document.getElementById("magnifyOverlay");
-const magnifyPanelSlotEl = document.getElementById("magnifyPanelSlot");
 const magnifyToolsSlotEl = document.getElementById("magnifyToolsSlot");
 const magnifyCanvasSlotEl = document.getElementById("magnifyCanvasSlot");
 
-const sidebarEl = document.querySelector(".sidebar");
-const appEl = document.querySelector(".app");
 const canvasAreaEl = document.querySelector(".canvas-area");
-const orientationRowEl = document.getElementById("orientationRow");
-const zoomControlEl = document.querySelector(".zoom-control");
 const eraserBtnEl = document.getElementById("eraserBtn");
-const clearBtnEl = document.getElementById("clearBtn");
-const exportBtnEl = document.getElementById("exportBtn");
+const clearBtnEl = document.getElementById("clearBtn"); // 不會搬進放大檢視，只拿來當作單格去除鈕搬回原位時的錨點
 
 function openMagnify(){
-  magnifyPanelSlotEl.appendChild(sidebarEl);
-  magnifyToolsSlotEl.appendChild(zoomControlEl);
   magnifyToolsSlotEl.appendChild(eraserBtnEl);
-  magnifyToolsSlotEl.appendChild(clearBtnEl);
   magnifyCanvasSlotEl.appendChild(gridWrapperEl);
   magnifyOverlayEl.classList.add("open");
   document.body.style.overflow = "hidden";
@@ -331,10 +323,7 @@ function openMagnify(){
 }
 
 function closeMagnify(){
-  appEl.insertBefore(sidebarEl, canvasAreaEl); // 面板搬回畫布區前面，恢復原本左右並排的順序
-  orientationRowEl.appendChild(zoomControlEl); // 縮放控制搬回尺寸/方向那一列的最後面
-  exportBtnEl.parentElement.insertBefore(eraserBtnEl, exportBtnEl); // 單格去除、清空畫布搬回輸出圖檔按鈕前面，維持原本順序
-  exportBtnEl.parentElement.insertBefore(clearBtnEl, exportBtnEl);
+  clearBtnEl.parentElement.insertBefore(eraserBtnEl, clearBtnEl); // 單格去除搬回清空畫布前面，恢復原本順序
   canvasAreaEl.appendChild(gridWrapperEl); // 畫布搬回畫布區最後面
   magnifyOverlayEl.classList.remove("open");
   document.body.style.overflow = "";

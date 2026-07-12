@@ -2,7 +2,6 @@
 
 const tabsEl = document.getElementById("tabs");
 const iconGridEl = document.getElementById("iconGrid");
-const sidebarPanelEl = document.querySelector(".sidebar");
 const sizeOptionsEl = document.getElementById("sizeOptions");
 const orientationEl = document.getElementById("orientationOptions");
 const gridOptionsEl = document.getElementById("gridOptions");
@@ -34,20 +33,11 @@ function positionTabsDropdown(){
 function toggleTabsDropdown(){
   const isOpen = tabsEl.classList.toggle("open");
   document.getElementById("tabsToggle").setAttribute("aria-expanded", isOpen ? "true" : "false");
-  // 在「放大檢視」彈窗裡，這個class會讓整個選圖案面板佔滿整個彈窗（見style.css），
-  // 平常桌面/手機版本沒有對應的CSS規則，所以加這個class不會有任何影響
-  sidebarPanelEl.classList.toggle("picker-open", isOpen);
   if(isOpen) positionTabsDropdown();
 }
 function closeTabsDropdown(){
-  // 只收合「分類清單」本身。在放大檢視裡選分類後要留著picker-open，
-  // 這樣才能繼續看到底下該分類的圖案格；圖案格真的被選走後才整個收合，見 closeMagnifyPicker()
   tabsEl.classList.remove("open");
   document.getElementById("tabsToggle").setAttribute("aria-expanded", "false");
-}
-function closeMagnifyPicker(){
-  closeTabsDropdown();
-  sidebarPanelEl.classList.remove("picker-open");
 }
 
 // ---- 韓文組字工具：選子音/母音(/收尾子音)，即時組成完整韓文字，點一下就能拿去蓋印 ----
@@ -98,7 +88,6 @@ function selectHangulGlyph(composed){
   state.selectedGlyph = composed;
   renderIcons();
   renderHangulPreview();
-  closeMagnifyPicker();
 }
 
 // ---- 韓文組字防呆提醒：組出來的字不是常見會用到的字時，先跟使用者確認 ----
@@ -141,7 +130,7 @@ function renderIcons(){
     const bitmap = getGlyphBitmap(name);
     const visual = svgFromPattern(bitmap, {cell:1.8, color:"#f3f1ea"});
     b.innerHTML = `<span class="icon-preview">${visual}</span><span class="glyph-label">${isCustomGlyph(name) ? "圖片" : name}</span>`;
-    b.onclick = ()=>{ exitEraserMode(); state.selectedGlyph = name; renderIcons(); closeMagnifyPicker(); };
+    b.onclick = ()=>{ exitEraserMode(); state.selectedGlyph = name; renderIcons(); };
     if(state.category === "上傳圖片"){
       // 調整過解析度會不斷產生新的像素圖，這裡讓使用者可以自行清掉不需要的，只留下要用的
       const delBtn = document.createElement("span");
