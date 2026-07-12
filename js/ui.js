@@ -235,16 +235,19 @@ function validateExportFields(){
   const dateEl = document.getElementById("exportDate");
   const timeEl = document.getElementById("exportTime");
   const nameEl = document.getElementById("exportName");
+  const lineNameEl = document.getElementById("exportLineName");
   const errorEl = document.getElementById("exportError");
 
   const missing = [];
   if(!dateEl.value) missing.push("預約課程日期");
   if(!timeEl.value) missing.push("預約課程時間");
   if(!nameEl.value.trim()) missing.push("姓名");
+  if(!lineNameEl.value.trim()) missing.push("LINE名稱");
 
   dateEl.classList.toggle("missing", !dateEl.value);
   timeEl.classList.toggle("missing", !timeEl.value);
   nameEl.classList.toggle("missing", !nameEl.value.trim());
+  lineNameEl.classList.toggle("missing", !lineNameEl.value.trim());
 
   if(missing.length){
     errorEl.textContent = `請先填寫：${missing.join("、")}，才能匯出圖片`;
@@ -269,6 +272,8 @@ function buildExportFilename(){
   return parts.join("＿") + ".png";
 }
 
+const EXPORT_INFO_BAR_HEIGHT = 160; // 輸出圖檔下方資訊列的高度(px)
+
 function exportCanvasAsPng(){
   if(!validateExportFields()) return;
 
@@ -278,10 +283,11 @@ function exportCanvasAsPng(){
   const cols = Math.max(1, Math.round(w/state.gridMm));
   const rows = Math.max(1, Math.round(h/state.gridMm));
   const cellPx = 24;
+  const patternHeight = rows*cellPx;
 
   const canvas = document.createElement("canvas");
   canvas.width = cols*cellPx;
-  canvas.height = rows*cellPx;
+  canvas.height = patternHeight + EXPORT_INFO_BAR_HEIGHT;
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -307,6 +313,47 @@ function exportCanvasAsPng(){
     }
   });
 
+  drawExportInfoBar(ctx, canvas.width, patternHeight);
+
+  // 品牌浮水印放在資訊列右下角（半透明），不會蓋到上面的設計本體；Logo 讀取失敗也不擋輸出流程
+  const logo = new Image();
+  logo.onload = () => {
+    const logoH = EXPORT_INFO_BAR_HEIGHT * 0.55;
+    const logoW = logoH * (logo.naturalWidth / logo.naturalHeight);
+    const margin = 20;
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.drawImage(logo, canvas.width - logoW - margin, patternHeight + (EXPORT_INFO_BAR_HEIGHT - logoH)/2, logoW, logoH);
+    ctx.restore();
+    finishExportCanvas(canvas);
+  };
+  logo.onerror = () => finishExportCanvas(canvas);
+  logo.src = "assets/images/logo-risuan.png";
+}
+
+// 畫布下方獨立的白底資訊列（姓名/LINE名稱/日期/時段/尺寸），跟上面的設計本體分開，不會互相蓋到
+function drawExportInfoBar(ctx, canvasWidth, infoBarY){
+  ctx.strokeStyle = "#d8d3c4";
+  ctx.beginPath();
+  ctx.moveTo(0, infoBarY);
+  ctx.lineTo(canvasWidth, infoBarY);
+  ctx.stroke();
+
+  const nameVal = document.getElementById("exportName").value.trim();
+  const lineNameVal = document.getElementById("exportLineName").value.trim();
+  const dateVal = document.getElementById("exportDate").value;
+  const timeVal = document.getElementById("exportTime").value;
+
+  ctx.fillStyle = "#2a2a25";
+  ctx.textBaseline = "middle";
+  ctx.font = "28px 'Noto Serif TC', serif";
+  const line1 = `姓名：${nameVal}　　LINE：${lineNameVal}`;
+  const line2 = `日期：${dateVal}　　時段：${timeVal}　　尺寸：${state.paper}`;
+  ctx.fillText(line1, 24, infoBarY + EXPORT_INFO_BAR_HEIGHT*0.35);
+  ctx.fillText(line2, 24, infoBarY + EXPORT_INFO_BAR_HEIGHT*0.72);
+}
+
+function finishExportCanvas(canvas){
   const filename = buildExportFilename();
 
   canvas.toBlob(async (blob)=>{
@@ -386,7 +433,8 @@ function isExportFormComplete(){
   const dateVal = document.getElementById("exportDate").value;
   const timeVal = document.getElementById("exportTime").value;
   const nameVal = document.getElementById("exportName").value.trim();
-  return !!(dateVal && timeVal && nameVal);
+  const lineNameVal = document.getElementById("exportLineName").value.trim();
+  return !!(dateVal && timeVal && nameVal && lineNameVal);
 }
 
 function updateExportFormConfirmState(){

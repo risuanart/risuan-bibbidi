@@ -224,10 +224,10 @@ document.getElementById("imageUploadInput").addEventListener("change", (e)=>{
 });
 
 // 日期／時段／姓名填寫後，清除對應欄位的紅字提醒，並一併存檔
-["exportDate","exportTime","exportName","exportOperator"].forEach(id=>{
+["exportDate","exportTime","exportName","exportLineName","exportOperator"].forEach(id=>{
   const el = document.getElementById(id);
   const handler = ()=>{
-    const hasValue = id==="exportName" ? el.value.trim() : el.value;
+    const hasValue = (id==="exportName" || id==="exportLineName") ? el.value.trim() : el.value;
     if(hasValue) el.classList.remove("missing");
     updateExportFormConfirmState();
     scheduleAutosave();

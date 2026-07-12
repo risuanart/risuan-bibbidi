@@ -48,6 +48,7 @@ function serializeState(){
     exportDate: document.getElementById("exportDate").value,
     exportTime: document.getElementById("exportTime").value,
     exportName: document.getElementById("exportName").value,
+    exportLineName: document.getElementById("exportLineName").value,
     exportOperator: document.getElementById("exportOperator").value
   };
 }
@@ -93,6 +94,7 @@ function restoreState(saved){
   if(saved.exportDate) document.getElementById("exportDate").value = saved.exportDate;
   if(saved.exportTime) document.getElementById("exportTime").value = saved.exportTime;
   if(saved.exportName) document.getElementById("exportName").value = saved.exportName;
+  if(saved.exportLineName) document.getElementById("exportLineName").value = saved.exportLineName;
   if(saved.exportOperator) document.getElementById("exportOperator").value = saved.exportOperator;
 }
 
