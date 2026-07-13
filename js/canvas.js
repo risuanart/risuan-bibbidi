@@ -5,7 +5,7 @@ const stitchGridEl = document.getElementById("stitchGrid");
 const zoomViewportEl = document.getElementById("zoomViewport");
 
 let previewCells = [];
-const PREVIEW_COLOR = "rgba(131,129,92,0.45)"; // 半透明橄欖綠
+const PREVIEW_COLOR = "rgba(var(--color-primary-btn-rgb),0.45)"; // 半透明橄欖綠，跟colors.css的按鈕色統一
 const DRAG_TARGET_COLOR = "var(--sidebar-bg)"; // 拖曳中新位置預覽，改回深色並加方框以利辨識
 
 function clearPreview(){

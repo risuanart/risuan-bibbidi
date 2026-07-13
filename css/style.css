@@ -35,7 +35,7 @@
     color:var(--color-interactive);font-size:11px;font-weight:400;transition:transform .15s ease;
   }
   .size-pill-wrap .size-pill-toggle[aria-expanded="true"] .chev{ transform:rotate(180deg); }
-  .size-pill-wrap .size-pill-note{ display:block;font-size:10.5px;color:#8a8578;margin:5px 2px 0; }
+  .size-pill-wrap .size-pill-note{ display:block;font-size:10.5px;color:var(--color-muted-text);margin:5px 2px 0; }
 
   .size-orientation-group{
     /* 開合改用transform+opacity做動畫（不用display:none切換），這樣才有辦法轉場；
@@ -72,7 +72,7 @@
   }
   .size-panel-note{ font-size:10.5px;color:rgba(245,239,198,.65);text-align:center;margin:2px 0 0; }
   #sizePanel .size-panel-confirm{
-    display:block;width:100%;border:none;background:var(--color-primary);color:#fff;
+    display:block;width:100%;border:none;background:var(--color-primary-btn);color:#fff;
     border-radius:20px;padding:11px;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:2px;
   }
   /* 首次進入排版頁面時，同一個#sizePanel改用置中彈窗的呈現方式，強制先選一次尺寸再開始排版。
@@ -155,7 +155,7 @@
   :root{
     --sidebar-bg:var(--color-dark-base);
     --sidebar-text:var(--color-light-text);
-    --main-bg:#faf7f0;
+    --main-bg:var(--color-light-bg);
     --accent:#ffffff;
     --pill-bg:color-mix(in srgb, var(--color-dark-base) 75%, white 25%);
     --line:#d8d3c4;
@@ -192,7 +192,7 @@
     display:flex;align-items:center;justify-content:center;
     width:44px;height:44px;border-radius:50%;color:#555;flex-shrink:0;
   }
-  .intro-ig-link:hover{ color:rgba(var(--color-primary-rgb),1); }
+  .intro-ig-link:hover{ color:var(--color-brand); }
   .intro-card h1{
     font-family:"Noto Serif TC",Georgia,serif;font-weight:700;font-size:22px;margin:0;color:var(--color-interactive);
   }
@@ -205,14 +205,14 @@
   .intro-price-row{
     display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:#222;
   }
-  .intro-price-note{ font-size:11px;color:#8a8578; }
-  .intro-warning{ font-size:11px;color:#8a8578;margin:0;line-height:1.6; }
+  .intro-price-note{ font-size:11px;color:var(--color-muted-text); }
+  .intro-warning{ font-size:11px;color:var(--color-muted-text);margin:0;line-height:1.6; }
   .intro-start-btn{
-    margin-top:8px;background:rgba(var(--color-primary-rgb),0.85);color:#fff;border:none;
+    margin-top:8px;background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border:none;
     border-radius:26px;padding:14px 20px;font-size:15px;font-weight:600;cursor:pointer;
     min-height:44px;align-self:center;
   }
-  .intro-start-btn:hover{ background:rgba(var(--color-primary-rgb),1); }
+  .intro-start-btn:hover{ background:rgba(var(--color-primary-btn-rgb),1); }
   .app[hidden]{ display:none; }
 
   /* ---------- 左側欄 ---------- */
@@ -287,7 +287,7 @@
   /* 任務26：面板本身已經是半透明橄欖綠背景，加上backdrop-filter就變成「有顏色的毛玻璃」，
      跟選取框的無色玻璃呼應但保留品牌色調；上面的按鈕本身維持實色（不是透明），
      確保翻轉/刪除/方向鍵的圖示在任何背景下都夠清楚好點擊，不會因為玻璃感犧牲可操作性 */
-  background:rgba(var(--color-primary-rgb),0.85);
+  background:rgba(var(--color-primary-btn-rgb),0.85);
   -webkit-backdrop-filter:blur(6px);
   backdrop-filter:blur(6px);
   border:1px solid rgba(255,255,255,0.25);
@@ -316,7 +316,7 @@
 .selection-frame{
   position:fixed;
   display:none;
-  border:2px solid rgba(var(--color-primary-rgb),0.85);
+  border:2px solid rgba(var(--color-primary-btn-rgb),0.85);
   /* 任務26之前這裡還有一個 0 0 0 9999px 的巨大box-shadow，本來想營造「其餘畫面變暗、只留選取範圍清楚」
      的聚光燈效果，但顏色(250,248,244)只有在畫布米色背景上才勉強不明顯，一旦選取框出現在側邊欄/按鈕
      等其他色塊區域，會整頁蒙上一層很醜的灰白霧，跟這次毛玻璃卡片的效果衝突，所以拿掉，
@@ -373,7 +373,7 @@
     background:#fff;border:1px solid var(--line);padding:8px 16px;border-radius:20px;
     font-size:13px;cursor:pointer;
   }
-  .pill-btn.active{background:rgba(var(--color-primary-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-rgb),0.85);}
+  .pill-btn.active{background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-btn-rgb),0.85);}
   .segmented-control{
     position:relative;display:inline-flex;background:#fff;border:1px solid var(--line);
     border-radius:20px;padding:3px;
@@ -385,9 +385,9 @@
   .segmented-control button.active{ color:#fff; }
   .segmented-slider{
     position:absolute;top:3px;left:3px;height:calc(100% - 6px);border-radius:20px;
-    background:rgba(var(--color-primary-rgb),0.85);transition:transform .25s ease, width .25s ease;z-index:0;
+    background:rgba(var(--color-primary-btn-rgb),0.85);transition:transform .25s ease, width .25s ease;z-index:0;
   }
-  .price-note{ font-size:11px;color:#8a8578;margin-left:8px; }
+  .price-note{ font-size:11px;color:var(--color-muted-text);margin-left:8px; }
   .current-price-label{
     display:inline-block;background:#fff;border:1px solid var(--line);
     padding:6px 14px;border-radius:20px;font-size:12px;color:#555;
@@ -400,8 +400,8 @@
        整個關掉，避免類似的樣式被系統預設值蓋過去 */
     color:#222;-webkit-appearance:none;appearance:none;
   }
-  .action-btn.primary{background:rgba(var(--color-primary-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-rgb),0.85);}
-  .action-btn.eraser-default{background:rgba(var(--color-primary-rgb),0.15);color:var(--color-primary);border-color:rgba(var(--color-primary-rgb),0.35);}
+  .action-btn.primary{background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-btn-rgb),0.85);}
+  .action-btn.eraser-default{background:rgba(var(--color-primary-btn-rgb),0.15);color:var(--color-primary-btn);border-color:rgba(var(--color-primary-btn-rgb),0.35);}
   .action-btn.eraser-active{background:rgba(var(--color-warning-rgb),0.45);color:#fff;border-color:rgba(var(--color-warning-rgb),0.45);}
   .action-btn.danger{background:rgba(var(--color-warning-rgb),0.85);color:#fff;border-color:rgba(var(--color-warning-rgb),0.85);}
   .action-btn.danger:hover{background:rgba(var(--color-warning-rgb),1);}
@@ -416,14 +416,14 @@
     display:flex;flex-direction:column;gap:3px;
   }
   .export-field label{
-    font-size:11px;color:#8a8578;padding-left:2px;
+    font-size:11px;color:var(--color-muted-text);padding-left:2px;
   }
   .export-input{
     background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:20px;
     font-size:13px;color:#222;
   }
   .export-input.missing{ border-color:var(--color-warning); }
-  .export-field-hint{ font-size:11px;color:#8a8578;line-height:1.5;padding-left:2px; }
+  .export-field-hint{ font-size:11px;color:var(--color-muted-text);line-height:1.5;padding-left:2px; }
   #exportName{ width:110px; }
   #exportDate{ width:130px; padding:7px 8px; }
   .export-error{ color:var(--color-warning); font-size:13px; min-height:18px; }
@@ -433,7 +433,7 @@
   .export-form-fields .export-input{ width:100%; }
   .action-btn:disabled{ opacity:.4;cursor:default; }
 
-  .grid-wrapper{display:inline-block;max-width:100%;border:2px solid rgba(var(--color-primary-rgb),0.85);background:#fff;overflow:auto;max-height:70vh;padding:0;}
+  .grid-wrapper{display:inline-block;max-width:100%;border:2px solid rgba(var(--color-primary-btn-rgb),0.85);background:#fff;overflow:auto;max-height:70vh;padding:0;}
   .zoom-viewport{overflow:hidden;}
   .stitch-grid{display:grid;}
   .cell{
@@ -464,7 +464,7 @@
   }
   .help-close{
     position:absolute;top:12px;right:14px;background:none;border:none;
-    font-size:18px;color:#8a8578;cursor:pointer;line-height:1;padding:4px;
+    font-size:18px;color:var(--color-muted-text);cursor:pointer;line-height:1;padding:4px;
   }
   .help-close:hover{ color:#222; }
   .help-icon{ font-size:44px;line-height:1;margin-bottom:14px; }
@@ -492,7 +492,7 @@
     display:flex;align-items:center;justify-content:center;
   }
   .help-nav-btn:disabled{ opacity:.3;cursor:default; }
-  .help-step-label{ font-size:12px;color:#8a8578; }
+  .help-step-label{ font-size:12px;color:var(--color-muted-text); }
   .cell[data-item-id]{ cursor: grab; }
 .cell[data-item-id]:active{ cursor: grabbing; }
 .flip-icon-vertical{ transform: rotate(90deg); }
@@ -579,5 +579,5 @@
 /* 任務19方向B使用者回饋：放大檢視新增「單格繪畫」，讓使用者可以直接在空格上畫出單一像素，
    方便細部修整或自行手繪，跟單格去除用同一種底色系統只是換個顏色區分開/關狀態 */
 .action-btn.paint-active{
-  background:rgba(var(--color-primary-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-rgb),0.85);
+  background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-btn-rgb),0.85);
 }
