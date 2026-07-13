@@ -195,16 +195,9 @@ function paintAll(){
 let dragState = null;
 let dragOriginCells = [];
 
-function clearDragOriginGhost(){
-  dragOriginCells.forEach(cell => {
-    cell.style.background = cell.dataset.itemId ? "var(--sidebar-bg)" : "";
-  });
-  dragOriginCells = [];
-}
-
-// 開始拖曳時，把該圖案原本佔用的格子改成半透明，當作「原始位置」的預覽提示
-function beginDragVisuals(id){
-  deselectItem();
+// 任務26追加：拖曳前(原位置)跟拖曳後(新落點)要用不同顏色區分，不是一片灰霧——
+// 原位置用半透明綠(PREVIEW_COLOR)，新落點維持深色(DRAG_TARGET_COLOR)
+function markDragOriginCells(id){
   const item = state.items[id];
   const bitmap = getItemBitmap(item);
   dragOriginCells = [];
@@ -218,6 +211,13 @@ function beginDragVisuals(id){
       dragOriginCells.push(cell);
     }
   }
+}
+
+function clearDragOriginMark(){
+  dragOriginCells.forEach(cell => {
+    cell.style.background = cell.dataset.itemId ? "var(--sidebar-bg)" : "";
+  });
+  dragOriginCells = [];
 }
 
 function updateDragPreview(item, hoverR, hoverC){
@@ -234,7 +234,7 @@ function updateDragPreview(item, hoverR, hoverC){
     for(let j=0;j<bitmap[i].length;j++){
       if(!bitmap[i][j]) continue;
       const cell = cellGrid[originR+i][originC+j];
-      // 跳過已經是「原始位置」半透明提示的格子，避免之後 clearPreview() 誤把它們恢復成深色
+      // 跳過已經標成原位置(綠色)的格子，避免這裡又把它蓋成深色，導致原位置的顏色標示消失
       if(dragOriginCells.includes(cell)) continue;
       cell.style.background = DRAG_TARGET_COLOR;
       previewCells.push(cell);
@@ -271,7 +271,8 @@ function handleDragMove(clientX, clientY){
   if(!dragState.dragging){
     if(Math.hypot(dx,dy) < 4) return; // 距離太短先當作點擊，避免手抖誤觸拖曳
     dragState.dragging = true;
-    beginDragVisuals(dragState.id);
+    deselectItem();
+    markDragOriginCells(dragState.id); // 任務26追加：拖曳前的原始位置標成半透明綠，跟新落點的深色區分開來
   }
   const pos = getCellFromPoint(clientX, clientY);
   const item = state.items[dragState.id];
@@ -289,7 +290,7 @@ function finishDrag(){
   const { id, dragging, validOrigin } = dragState;
   if(dragging){
     clearPreview();
-    clearDragOriginGhost();
+    clearDragOriginMark();
     hideSelectionFrame();
     if(validOrigin){
       state.items[id].r = validOrigin.originR;
@@ -428,7 +429,7 @@ function updateResizeBtnVisibility(id){
 function deselectItem(){
   state.selectedItemId = null;
   document.getElementById('itemToolbar').style.display = 'none';
-  document.getElementById('selectionFrame').style.display = 'none';
+  hideSelectionFrame();
 }
 
 function positionToolbar(id){
@@ -506,8 +507,52 @@ function positionFrameAtBBox(bbox){
   frameEl.style.height = (bottom - top) + 'px';
 }
 
+// 任務26：毛玻璃霧面蓋在選取範圍「外面」，只蓋在畫布區塊(藍色底)裡，不能跨到深色的側邊欄圖示選取區。
+// 一般排版頁面用.canvas-area的範圍當外框；如果目前在放大檢視裡選取（放大檢視也能選取/移動圖案），
+// 改用.magnify-canvas-slot的範圍，因為這時候.canvas-area雖然還在DOM裡、但畫布已經被搬進彈窗，
+// 拿.canvas-area的位置會完全對不上實際看到的畫面
+function getGlassOverlayContainer(){
+  const magnifyOverlayEl = document.getElementById('magnifyOverlay');
+  if(magnifyOverlayEl && magnifyOverlayEl.classList.contains('open')){
+    return document.getElementById('magnifyCanvasSlot');
+  }
+  return document.querySelector('.canvas-area');
+}
+
+function positionCanvasGlassOverlay(bbox){
+  const overlayEl = document.getElementById('canvasGlassOverlay');
+  const topCell = bbox && cellGrid[bbox.topRow] && cellGrid[bbox.topRow][bbox.leftCol];
+  const bottomCell = bbox && cellGrid[bbox.bottomRow] && cellGrid[bbox.bottomRow][bbox.rightCol];
+  if(!topCell || !bottomCell){ hideCanvasGlassOverlay(); return; }
+  const outerRect = getGlassOverlayContainer().getBoundingClientRect();
+  const topRect = topCell.getBoundingClientRect();
+  const bottomRect = bottomCell.getBoundingClientRect();
+  // 跟positionFrameAtBBox一樣用min/max，不假設topRect一定是視覺左上角（放大檢視轉向後會不成立）
+  const itemLeft = Math.min(topRect.left, bottomRect.left) - outerRect.left;
+  const itemTop = Math.min(topRect.top, bottomRect.top) - outerRect.top;
+  const itemRight = Math.max(topRect.right, bottomRect.right) - outerRect.left;
+  const itemBottom = Math.max(topRect.bottom, bottomRect.bottom) - outerRect.top;
+  const w = outerRect.width, h = outerRect.height;
+  overlayEl.style.left = outerRect.left + 'px';
+  overlayEl.style.top = outerRect.top + 'px';
+  overlayEl.style.width = w + 'px';
+  overlayEl.style.height = h + 'px';
+  // evenodd手法：外框(整個容器) 疊上 內框(選取範圍，方向相反/共用起點)，兩個框中間的環狀區域才會被填色，
+  // 內框(選取的圖案本身)維持透空、不會被模糊到
+  overlayEl.style.clipPath =
+    `polygon(evenodd, 0 0, ${w}px 0, ${w}px ${h}px, 0 ${h}px, 0 0, ` +
+    `${itemLeft}px ${itemTop}px, ${itemLeft}px ${itemBottom}px, ${itemRight}px ${itemBottom}px, ${itemRight}px ${itemTop}px, ${itemLeft}px ${itemTop}px)`;
+  overlayEl.classList.add('show');
+}
+
+function hideCanvasGlassOverlay(){
+  document.getElementById('canvasGlassOverlay').classList.remove('show');
+}
+
 function hideSelectionFrame(){
-  document.getElementById('selectionFrame').style.display = 'none';
+  const frameEl = document.getElementById('selectionFrame');
+  frameEl.style.display = 'none';
+  hideCanvasGlassOverlay(); // 任務26：離開選取狀態就把霧面效果一起收掉，避免殘留到下次拖曳預覽框上
 }
 
 function positionSelectionFrame(id){
@@ -515,6 +560,9 @@ function positionSelectionFrame(id){
   if(!item){ hideSelectionFrame(); return; }
   const bbox = getItemGridBBox(item);
   positionFrameAtBBox(bbox);
+  // 任務26：只有「選取狀態」（這個函式）才顯示毛玻璃霧面，拖曳中顯示新位置的框
+  // 是直接呼叫上面共用的positionFrameAtBBox（不經過這裡），畫面才能保持乾淨無干擾
+  positionCanvasGlassOverlay(bbox);
 }
 
 function buildGrid(resetItems = true){

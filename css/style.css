@@ -82,11 +82,16 @@
     left:20px; right:20px; top:0; bottom:0; margin:auto;
     height:fit-content; max-height:calc(100% - 40px); overflow-y:auto;
   }
-  .size-scrim{
+  /* 用#sizeScrim（ID優先度較高）而不是.size-scrim，避免被後面桌面版.size-scrim{display:none}
+     蓋掉——這兩條優先度原本相同(都是單一class)，寫在後面的桌面規則會贏，導致這裡設的display:block
+     其實從來沒真的生效過（電腦版computed style還是回報opacity/backdrop-filter正確，因為那些
+     屬性在display:none底下還是算得出值，只是不會畫出來，這個坑之前修別的元件時也踩過一次） */
+  #sizeScrim{
     display:block;position:fixed;inset:0;background:rgba(20,18,15,.55);z-index:55;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px); /* 讓下拉選單/首次進入彈窗後面的畫面模糊，襯托選單本身 */
     opacity:0;pointer-events:none;transition:opacity 300ms ease-out;
   }
-  .size-scrim.open{ opacity:1;pointer-events:auto; }
+  #sizeScrim.open{ opacity:1;pointer-events:auto; }
   .grid-wrapper{
     max-width: 100%;
     overflow-x: auto;         /* 格子太寬時可以左右滑動看 */
@@ -279,7 +284,13 @@
   flex-direction:column;
   align-items:center;
   gap:6px;
+  /* 任務26：面板本身已經是半透明橄欖綠背景，加上backdrop-filter就變成「有顏色的毛玻璃」，
+     跟選取框的無色玻璃呼應但保留品牌色調；上面的按鈕本身維持實色（不是透明），
+     確保翻轉/刪除/方向鍵的圖示在任何背景下都夠清楚好點擊，不會因為玻璃感犧牲可操作性 */
   background:rgba(var(--color-primary-rgb),0.85);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,0.25);
   padding:4px;
   border-radius:6px;
   box-shadow:0 2px 8px rgba(0,0,0,.3);
@@ -306,11 +317,31 @@
   position:fixed;
   display:none;
   border:2px solid rgba(var(--color-primary-rgb),0.85);
-  box-shadow:0 2px 10px rgba(0,0,0,.15), 0 0 0 9999px rgba(250,248,244,.75);
+  /* 任務26之前這裡還有一個 0 0 0 9999px 的巨大box-shadow，本來想營造「其餘畫面變暗、只留選取範圍清楚」
+     的聚光燈效果，但顏色(250,248,244)只有在畫布米色背景上才勉強不明顯，一旦選取框出現在側邊欄/按鈕
+     等其他色塊區域，會整頁蒙上一層很醜的灰白霧，跟這次毛玻璃卡片的效果衝突，所以拿掉，
+     改成單純卡片本身的立體陰影 */
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
   pointer-events:none;
   z-index:400;
   border-radius:2px;
 }
+/* 任務26調整：毛玻璃效果不是加在選取框「裡面」（那樣會把被選取的圖案本身模糊掉），
+   改成蓋在選取框「外面」——見下面 .canvas-glass-overlay，選取的圖案本身維持清楚不受影響。 */
+/* 選取狀態時，畫布區塊(藍色底)裡選取範圍以外的地方套上毛玻璃霧面，襯托出被選取的圖案；
+   用clip-path挖一個跟選取範圍一樣大小的洞，讓被選取的圖案本身不會被模糊到。
+   只蓋在.canvas-area範圍內（見JS用canvas-area的rect定位），不會跨到深色的側邊欄圖示選取區。
+   backdrop-filter 不支援的舊瀏覽器會直接忽略該行，退回半透明白色當fallback。 */
+.canvas-glass-overlay{
+  position:fixed;
+  display:none;
+  background: rgba(255,255,255,0.4);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  pointer-events:none;
+  z-index:390; /* 選取框(400)、功能面板(500)在它上面，才不會被自己的模糊效果影響 */
+}
+.canvas-glass-overlay.show{ display:block; }
 .item-toolbar button{
   width:var(--toolbar-button-size);height:var(--toolbar-button-size);
   border:none;border-radius:4px;
