@@ -632,6 +632,7 @@ function buildGrid(resetItems = true){
   paintAll(); // 重新畫上（換紙張尺寸/方向時）保留下來的圖案
   zoom = computeFitZoom(); // 每次換紙張尺寸/方向/格數，都重新算一次能完整顯示畫布的縮放比例
   applyZoom();
+  updateCurrentPriceLabel(); // 紙張或方向只要有一個變動就會呼叫buildGrid，這裡統一更新不用個別呼叫端各自記得呼叫
   scheduleAutosave();
 }
 

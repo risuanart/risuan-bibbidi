@@ -10,7 +10,8 @@ let state = {
   nextItemId: 1,
   selectedItemId: null,
   eraserMode: false,
-  paintMode: false // 放大檢視專用的「單格繪畫」，離開放大檢視就會自動關閉，見 closeMagnify()
+  paintMode: false, // 放大檢視專用的「單格繪畫」，離開放大檢視就會自動關閉，見 closeMagnify()
+  sizeConfirmed: false // 任務25：使用者是否已經確認過一次尺寸/方向選擇，決定進入排版頁面時要不要強制跳出選擇彈窗
 };
 
 // 選好新圖案時，順便關閉橡皮擦模式，避免使用者以為選了圖案卻還在擦除狀態

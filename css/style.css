@@ -16,17 +16,77 @@
   .toolbar-row{
     justify-content: center;  /* 按鈕置中，避免擠成一團 */
   }
+  /* 任務25：這行「目前選擇：...」桌面版才顯示，手機版已經在收合pill上顯示同樣資訊，不用重複一份。
+     用複合選擇器.toolbar-row.desktop-price-row提高優先度，避免被後面桌面版.toolbar-row{display:flex}蓋掉
+     （兩者原本優先度相同，後寫的桌面版規則會贏，這裡踩到跟.tabs-wrap同樣的坑） */
+  .toolbar-row.desktop-price-row{ display:none; }
+  /* 任務25：手機版尺寸/方向選單收合成pill+下拉（或首次進入時的置中彈窗），
+     這裡的.size-orientation-group（也就是#sizePanel）在手機版變成下拉/彈窗內容本身，
+     不再是常駐展開的樣式；桌面版維持原本flex展開排列（見桌面版對應規則）。 */
+  /* 這幾條都用 .size-pill-wrap 前綴提高優先度，避免被後面桌面版同名class的隱藏規則蓋掉
+     （跟.tabs-wrap .tabs-toggle是同一種寫法，同一個原因） */
+  .size-pill-wrap{ position:relative;margin-bottom:12px; }
+  .size-pill-wrap .size-pill-toggle{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+    background:var(--color-dark-base);color:var(--color-light-text);border:none;
+    border-radius:20px;padding:11px 16px;font-size:13.5px;font-weight:700;cursor:pointer;
+  }
+  .size-pill-wrap .size-pill-toggle .chev{
+    color:var(--color-interactive);font-size:11px;font-weight:400;transition:transform .15s ease;
+  }
+  .size-pill-wrap .size-pill-toggle[aria-expanded="true"] .chev{ transform:rotate(180deg); }
+  .size-pill-wrap .size-pill-note{ display:block;font-size:10.5px;color:#8a8578;margin:5px 2px 0; }
+
   .size-orientation-group{
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
+    /* 開合改用transform+opacity做動畫（不用display:none切換），這樣才有辦法轉場；
+       關閉時translateY(-120%)把面板滑出可視範圍上緣＋pointer-events:none避免擋住下面的內容，
+       面板本身還是有layout（position:fixed不影響文件流），量測按鈕寬度不會再抓到0 */
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
+    position: fixed;           /* 跟分類下拉/選取框同一種修法，避免被.canvas-area的overflow裁切 */
+    z-index: 60;
+    left: 16px; right: 16px;
+    background: color-mix(in srgb, var(--color-dark-base) 82%, white 18%);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    display: flex;
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+  }
+  .size-orientation-group.open{
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
   .size-orientation-group .toolbar-row{
     width: auto;
     margin-bottom: 0;
+    justify-content: flex-start;
   }
+  #sizePanel .size-panel-group-label{
+    display:block;font-size:11px;color:var(--color-interactive);letter-spacing:.05em;margin:0 0 -2px;font-weight:700;
+  }
+  .size-panel-note{ font-size:10.5px;color:rgba(245,239,198,.65);text-align:center;margin:2px 0 0; }
+  #sizePanel .size-panel-confirm{
+    display:block;width:100%;border:none;background:var(--color-primary);color:#fff;
+    border-radius:20px;padding:11px;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:2px;
+  }
+  /* 首次進入排版頁面時，同一個#sizePanel改用置中彈窗的呈現方式，強制先選一次尺寸再開始排版。
+     置中改用top:0;bottom:0;margin:auto（不佔用transform），這樣transform可以專心留給上面的開合動畫用，
+     兩者才不會互相蓋掉對方（一個元素的transform只能有一個值，硬要疊加置中+開合會變成要手動組合calc()，不如分開兩種方式各司其職） */
+  .size-orientation-group.first-entry{
+    left:20px; right:20px; top:0; bottom:0; margin:auto;
+    height:fit-content; max-height:calc(100% - 40px); overflow-y:auto;
+  }
+  .size-scrim{
+    display:block;position:fixed;inset:0;background:rgba(20,18,15,.55);z-index:55;
+    opacity:0;pointer-events:none;transition:opacity 300ms ease-out;
+  }
+  .size-scrim.open{ opacity:1;pointer-events:auto; }
   .grid-wrapper{
     max-width: 100%;
     overflow-x: auto;         /* 格子太寬時可以左右滑動看 */
@@ -161,6 +221,8 @@
   .sidebar p{font-size:12px;line-height:1.6;opacity:.9;margin:0 0 10px;color:var(--color-interactive);}
 
   .tabs-toggle{ display:none; } /* 桌面版維持原本展開列表，收合按鈕只在手機版顯示 */
+  /* 任務25：桌面版空間充足，維持原本常駐展開的尺寸/方向選單，收合pill/提示/確認鈕/遮罩都只在手機版才出現 */
+  .size-pill-toggle,.size-pill-note,.size-panel-confirm,.size-scrim,.size-panel-group-label{ display:none; }
   .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
   .tab{
     background:var(--pill-bg);border:none;color:var(--color-interactive);

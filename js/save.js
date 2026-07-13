@@ -39,6 +39,7 @@ function serializeState(){
     paper: state.paper,
     orientation: state.orientation,
     gridMm: state.gridMm,
+    sizeConfirmed: state.sizeConfirmed,
     nextItemId: state.nextItemId,
     nextCustomId,
     uploadedIds: categories["上傳圖片"].slice(),
@@ -82,6 +83,7 @@ function restoreState(saved){
   state.paper = saved.paper || state.paper;
   state.orientation = saved.orientation || state.orientation;
   state.gridMm = saved.gridMm || state.gridMm;
+  state.sizeConfirmed = !!saved.sizeConfirmed;
   state.nextItemId = saved.nextItemId || 1;
   state.items = {};
   Object.keys(saved.items || {}).forEach(id=>{

@@ -45,6 +45,48 @@ function closeTabsDropdown(){
   document.getElementById("tabsToggle").setAttribute("aria-expanded", "false");
 }
 
+// ---- 任務25：手機版尺寸/方向選單收合成pill＋下拉，首次進入排版頁面時改用置中彈窗強制先選一次 ----
+// 下拉模式跟首次進入的彈窗其實是同一個 #sizePanel（同一份DOM、同一套renderSizeOptions/renderOrientation），
+// 差別只在CSS呈現方式（貼齊pill下緣的下拉 vs 置中+遮罩的彈窗），避免做出兩套相似但不同的選擇介面。
+const sizePanelEl = document.getElementById("sizePanel");
+const sizeScrimEl = document.getElementById("sizeScrim");
+const sizePillToggleEl = document.getElementById("sizePillToggle");
+let sizePanelFirstEntry = false; // 目前開啟的是不是「首次進入、強制選一次」模式
+
+function positionSizePanelDropdown(){
+  const toggleRect = sizePillToggleEl.getBoundingClientRect();
+  sizePanelEl.style.top = (toggleRect.bottom + 6) + "px";
+}
+
+function openSizePanel(firstEntry){
+  sizePanelFirstEntry = !!firstEntry;
+  sizePanelEl.classList.toggle("first-entry", sizePanelFirstEntry);
+  sizePanelEl.classList.add("open");
+  sizeScrimEl.classList.add("open");
+  sizePillToggleEl.setAttribute("aria-expanded", "true");
+  document.getElementById("sizePanelConfirm").textContent = sizePanelFirstEntry ? "開始排版" : "套用";
+  if(!sizePanelFirstEntry) positionSizePanelDropdown();
+  // 面板平常是display:none，選中狀態的滑塊寬度在那之前量測都會是0，
+  // 打開之後（元素已經看得到、量得到寬度）要重新算一次，不然選中的按鈕會變成白字沒有背景色、幾乎看不見
+  positionAllSegmentedSliders();
+}
+
+function closeSizePanel(){
+  // 首次進入、尚未確認過尺寸時，遮罩點擊不應該直接關閉——一定要按下確認鈕，
+  // 確保使用者至少看過一次尺寸/價格才進入正式排版（見confirmSizePanel）
+  if(sizePanelFirstEntry && !state.sizeConfirmed) return;
+  sizePanelEl.classList.remove("open", "first-entry");
+  sizeScrimEl.classList.remove("open");
+  sizePillToggleEl.setAttribute("aria-expanded", "false");
+  sizePanelFirstEntry = false;
+}
+
+function confirmSizePanel(){
+  state.sizeConfirmed = true;
+  scheduleAutosave();
+  closeSizePanel();
+}
+
 // ---- 韓文組字工具：選子音/母音(/收尾子音)，即時組成完整韓文字，點一下就能拿去蓋印 ----
 const choSelectEl = document.getElementById("choSelect");
 const jungSelectEl = document.getElementById("jungSelect");
@@ -180,10 +222,12 @@ function renderSizeOptions(){
   updateCurrentPriceLabel();
 }
 
-// 畫布上方常駐標籤：讓使用者排版到一半也能隨時看到目前選的尺寸跟價格
+// 任務25：桌面版沿用原本畫布上方常駐的「目前選擇：...」提示；手機版改顯示在收合pill上（同一份資料，兩個地方一起更新）
 function updateCurrentPriceLabel(){
   const price = paperSizes[state.paper].price;
   document.getElementById("currentPriceLabel").textContent = `目前選擇：${state.paper}・NT$${price}（不含畫框費用）`;
+  const pillLabel = document.getElementById("sizePillLabel");
+  if(pillLabel) pillLabel.textContent = `${state.paper}・NT$${price}・${orientationLabels[state.orientation]}`;
 }
 
 function positionSegmentedSlider(containerEl){

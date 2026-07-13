@@ -65,19 +65,28 @@
 
   <!-- 右側：畫布工具列 + 格子畫布 -->
   <main class="canvas-area">
-    <div class="size-orientation-group">
-      <div class="toolbar-row" id="sizeOptions"></div>
-      <div class="toolbar-row" id="orientationRow">
-        <div id="orientationOptions" style="display:flex;gap:8px;"></div>
-
-       <div class="zoom-control">
-         <button class="action-btn" id="zoomOutBtn">－</button>
-         <span id="zoomLabel" style="font-size:13px;width:44px;text-align:center">100%</span>
-         <button class="action-btn" id="zoomInBtn">＋</button>
-       </div>
+    <!-- 任務25：手機版收合成一顆精簡提示pill＋下拉選單，桌面版維持原本常駐展開的樣式（見css .size-pill-toggle{display:none}）。
+         首次進入排版頁面（尚未選過尺寸）時，同一個#sizePanel會以「置中彈窗＋遮罩」的樣式強制先選一次，見js/main.js showLayoutScreen()。 -->
+    <div class="size-pill-wrap" id="sizePillWrap">
+      <button class="size-pill-toggle" id="sizePillToggle" type="button" aria-haspopup="dialog" aria-expanded="false">
+        <span id="sizePillLabel"></span>
+        <span class="chev" aria-hidden="true">▾</span>
+      </button>
+      <p class="size-pill-note">不含畫框費用 · 點擊可重新選擇尺寸</p>
+      <div class="size-orientation-group" id="sizePanel">
+        <div class="size-panel-group-label">尺寸</div>
+        <div class="toolbar-row" id="sizeOptions"></div>
+        <div class="size-panel-group-label">方向</div>
+        <div class="toolbar-row" id="orientationRow">
+          <div id="orientationOptions" style="display:flex;gap:8px;"></div>
+        </div>
+        <p class="size-panel-note">不含畫框費用</p>
+        <button class="size-panel-confirm" id="sizePanelConfirm" type="button">套用</button>
       </div>
     </div>
-    <div class="toolbar-row">
+    <div class="size-scrim" id="sizeScrim"></div>
+    <!-- 桌面版沿用的常駐提示；手機版已經改由收合pill顯示同樣資訊，這行只在手機版隱藏 -->
+    <div class="toolbar-row desktop-price-row">
      <span class="current-price-label" id="currentPriceLabel"></span>
     </div>
     <div class="toolbar-row">
@@ -91,6 +100,11 @@
        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
        放大檢視
      </button>
+     <div class="zoom-control">
+       <button class="action-btn" id="zoomOutBtn" style="margin-left:0">－</button>
+       <span id="zoomLabel" style="font-size:13px;width:44px;text-align:center">100%</span>
+       <button class="action-btn" id="zoomInBtn" style="margin-left:0">＋</button>
+     </div>
      <button class="action-btn primary" id="exportBtn" style="margin-left:0">輸出圖檔</button>
     </div>
     <div class="grid-wrapper">

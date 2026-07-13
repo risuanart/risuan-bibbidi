@@ -221,6 +221,18 @@ document.addEventListener("click", (e)=>{
   if(!wrap.contains(e.target)) closeTabsDropdown(); // 點選單以外的地方也收合
 });
 
+// 任務25：手機版尺寸/方向收合pill——點pill開關下拉，點確認鈕套用並收合，
+// 首次進入排版頁面前（尚未選過尺寸）由 showLayoutScreen() 強制以彈窗模式打開
+document.getElementById("sizePillToggle").onclick = ()=>{
+  if(sizePanelEl.classList.contains("open")) closeSizePanel();
+  else openSizePanel(false);
+};
+document.getElementById("sizePanelConfirm").onclick = confirmSizePanel;
+sizeScrimEl.onclick = closeSizePanel;
+window.addEventListener("resize", ()=>{
+  if(sizePanelEl.classList.contains("open") && !sizePanelFirstEntry) positionSizePanelDropdown();
+});
+
 document.querySelector(".help-btn").onclick = openHelp;
 document.getElementById("helpCloseBtn").onclick = closeHelp;
 document.getElementById("helpOverlay").onclick = (e)=>{
@@ -301,6 +313,8 @@ function showLayoutScreen(pushHistory){
   appScreenEl.hidden = false;
   buildGrid(false);
   positionAllSegmentedSliders();
+  // 任務25：手機版尚未選過一次尺寸/方向時，進入排版頁面就強制跳出選擇彈窗
+  if(!state.sizeConfirmed) openSizePanel(true);
   if(pushHistory) history.pushState({ screen: "layout" }, "", "#layout");
 }
 function showIntroScreen(){
