@@ -433,6 +433,18 @@
 }
 .magnify-canvas-slot .grid-wrapper{ margin:0 auto; }
 
+/* 任務23：橫式畫布進入放大檢視時，視覺上轉90度，讓橫式畫布利用手機螢幕較長的那一側。
+   純CSS視覺轉向，不動裝置實際方向。做法：.grid-wrapper本身的版面尺寸（寬高）由JS
+   直接設成「轉向後」的寬高（即原本的高寬互換），裡面的 #zoomViewport 維持自己原本
+   （未轉向）的實際尺寸，用position:absolute置中再transform:rotate(90deg)轉正貼滿
+   外層的框。這樣外層.grid-wrapper／再外層.magnify-canvas-slot（overflow:auto）拿到的
+   捲動範圍尺寸，本來就是轉向後的正確尺寸，捲動方向不會因為轉向而變得不直覺。 */
+.grid-wrapper.rotated{ overflow:visible;max-height:none; }
+.grid-wrapper.rotated #zoomViewport{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(90deg);
+}
+
 /* 畫布縮放範圍調整：完整顯示（不需要捲動）時才出現這個小提示，
    沒出現就代表目前畫布沒有完整顯示，擺放圖案時要注意可能超出可視範圍。
    做成小布標籤的感覺，緊貼畫布外側正邊緣（完全不重疊到畫布本身）。

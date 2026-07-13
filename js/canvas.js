@@ -658,10 +658,18 @@ const MAX_ZOOM = 1;
 // 讓手機版切換到格數較多的尺寸（例如 A3 橫式）時，不用使用者自己手動縮小就能看到全貌。
 function computeFitZoom(){
   const naturalWidth = gridCols * CELL_PX;
+  const naturalHeight = gridRows * CELL_PX;
   if(naturalWidth <= 0) return MAX_ZOOM;
   // 用 grid-wrapper 目前實際所在的容器寬度來算，而不是寫死 canvasAreaEl，
   // 這樣「放大檢視」把畫布搬進彈窗時，也能照彈窗的寬度重新計算縮放比例
   const availWidth = gridWrapperEl.parentElement.clientWidth - CANVAS_FIT_MARGIN * 2;
+  // 任務23：橫式畫布在放大檢視裡轉向90度後，畫布的寬對應到容器的高、畫布的高對應到容器的寬，
+  // 兩個方向都要能塞下（取較小值），才能讓轉向後的畫布完整顯示、不用捲動就佔滿手機螢幕長邊
+  if(gridWrapperEl.classList.contains("rotated")){
+    const availHeight = gridWrapperEl.parentElement.clientHeight - CANVAS_FIT_MARGIN * 2;
+    const fit = Math.min(availHeight / naturalWidth, availWidth / naturalHeight);
+    return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fit));
+  }
   const fit = availWidth / naturalWidth;
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fit));
 }
@@ -678,8 +686,11 @@ function applyZoom(){
 // 畫布是否完整顯示（不用捲動就能看到全部）：比較 grid-wrapper 實際內容大小跟目前可視框大小，
 // 完整顯示才出現小提示，沒出現代表目前有裁切，擺放圖案時要注意可能超出可視範圍
 function updateCanvasFitBadge(){
-  const fullyVisible = gridWrapperEl.scrollWidth <= gridWrapperEl.clientWidth + 1 &&
-                        gridWrapperEl.scrollHeight <= gridWrapperEl.clientHeight + 1;
+  // 轉向時 grid-wrapper 本身改成 overflow:visible（捲動交給外層.magnify-canvas-slot負責，
+  // 見css.grid-wrapper.rotated的註解），所以「是否完整顯示」要改看外層容器的捲動狀態
+  const measureEl = gridWrapperEl.classList.contains("rotated") ? gridWrapperEl.parentElement : gridWrapperEl;
+  const fullyVisible = measureEl.scrollWidth <= measureEl.clientWidth + 1 &&
+                        measureEl.scrollHeight <= measureEl.clientHeight + 1;
   // 一般畫布跟放大檢視各有自己的一份提示（放大檢視開啟時畫布會搬進去，
   // 兩者不會同時顯示，但兩個都要跟著同一個判斷結果切換）
   ["canvasFitBadge", "canvasFitBadgeMagnify"].forEach(elId=>{
@@ -703,7 +714,9 @@ function positionCanvasFitBadge(){
     if(isMobile){
       const badgeWidth = badge.offsetWidth || 28;
       badge.style.top = (gridWrapperEl.offsetTop + gridWrapperEl.offsetHeight/2) + "px";
-      badge.style.left = (gridWrapperEl.offsetLeft - badgeWidth) + "px";
+      // 放大檢視裡橫式畫布轉向後，畫布左側可能只剩很窄的留白（不夠放下標籤寬度），
+      // 這裡夾住不讓它變成負值，避免被彈窗的overflow:hidden裁掉、標籤消失看不到
+      badge.style.left = Math.max(0, gridWrapperEl.offsetLeft - badgeWidth) + "px";
     } else {
       const badgeWidth = badge.offsetWidth || 112;
       badge.style.top = (gridWrapperEl.offsetTop + gridWrapperEl.offsetHeight) + "px"; // 緊貼畫布下緣，完全不重疊
@@ -716,8 +729,20 @@ function positionCanvasFitBadge(){
 // 所以中間加一層 zoom-viewport，明確設定成縮放後的實際大小並裁切超出範圍的內容，
 // 外層 .grid-wrapper（inline-block）就會自動貼齊這層 viewport 的大小，不會多出空白可捲動。
 function updateGridWrapperSize(){
-  zoomViewportEl.style.width = (gridCols * CELL_PX * zoom) + "px";
-  zoomViewportEl.style.height = (gridRows * CELL_PX * zoom) + "px";
+  const w = gridCols * CELL_PX * zoom;
+  const h = gridRows * CELL_PX * zoom;
+  zoomViewportEl.style.width = w + "px";
+  zoomViewportEl.style.height = h + "px";
+  // 任務23：轉向時 #zoomViewport 靠CSS轉90度置中撐滿，但它本身脫離了正常版面流（position:absolute），
+  // 外層.grid-wrapper不會自動撐出正確尺寸，所以這裡手動把grid-wrapper設成「轉向後」的寬高（寬高互換），
+  // 這樣.magnify-canvas-slot（overflow:auto）才能量到正確的、跟畫面看起來一致的捲動範圍
+  if(gridWrapperEl.classList.contains("rotated")){
+    gridWrapperEl.style.width = h + "px";
+    gridWrapperEl.style.height = w + "px";
+  } else {
+    gridWrapperEl.style.width = "";
+    gridWrapperEl.style.height = "";
+  }
 }
 
 // 手機雙指觸控縮放畫布

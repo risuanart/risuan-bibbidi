@@ -337,6 +337,8 @@ function openMagnify(){
   magnifyToolsSlotEl.appendChild(undoBtnEl);
   magnifyToolsSlotEl.appendChild(eraserBtnEl);
   magnifyCanvasSlotEl.appendChild(gridWrapperEl);
+  // 任務23：橫式畫布進入放大檢視時視覺上轉90度，利用手機螢幕較長的那一側
+  gridWrapperEl.classList.toggle("rotated", state.orientation === "Landscape");
   magnifyOverlayEl.classList.add("open");
   document.body.style.overflow = "hidden";
   requestAnimationFrame(()=>{
@@ -349,6 +351,7 @@ function closeMagnify(){
   exitPaintMode(); // 單格繪畫只存在放大檢視裡，離開就強制關閉，避免留著跑到外面的畫布繼續生效
   clearBtnEl.parentElement.insertBefore(eraserBtnEl, clearBtnEl); // 單格去除搬回清空畫布前面，恢復原本順序
   eraserBtnEl.parentElement.insertBefore(undoBtnEl, eraserBtnEl); // 復原搬回單格去除前面，恢復原本順序
+  gridWrapperEl.classList.remove("rotated"); // 退出放大檢視，畫布恢復原本未旋轉的呈現方式
   canvasAreaEl.appendChild(gridWrapperEl); // 畫布搬回畫布區最後面
   magnifyOverlayEl.classList.remove("open");
   document.body.style.overflow = "";
