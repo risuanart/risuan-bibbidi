@@ -302,6 +302,10 @@
   .action-btn{
     margin-left:auto;background:#fff;border:1px solid var(--line);padding:8px 18px;
     border-radius:20px;font-size:13px;cursor:pointer;
+    /* 沒有明確設定color的話，iOS Safari的<button>預設會用系統藍色調（不是繼承body的文字色），
+       電腦版瀏覽器不會有這個問題，所以之前沒發現。-webkit-appearance:none把系統原生按鈕外觀
+       整個關掉，避免類似的樣式被系統預設值蓋過去 */
+    color:#222;-webkit-appearance:none;appearance:none;
   }
   .action-btn.primary{background:rgba(var(--color-primary-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-rgb),0.85);}
   .action-btn.eraser-default{background:rgba(var(--color-primary-rgb),0.15);color:var(--color-primary);border-color:rgba(var(--color-primary-rgb),0.35);}
@@ -441,8 +445,12 @@
    捲動範圍尺寸，本來就是轉向後的正確尺寸，捲動方向不會因為轉向而變得不直覺。 */
 .grid-wrapper.rotated{ overflow:visible;max-height:none; }
 .grid-wrapper.rotated #zoomViewport{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%) rotate(90deg);
+  position:absolute;
+  transform:rotate(90deg);
+  /* left/top改由JS算好整數px直接指定（見canvas.js updateGridWrapperSize），
+     不用top:50%;left:50%+translate(-50%,-50%)：那個算法碰到奇數px尺寸時
+     會產生0.5px的次像素偏移，導致整個轉向後的畫布被瀏覽器做次像素模糊處理，
+     視覺上看起來像蒙上一層灰、對比度變低 */
 }
 
 /* 畫布縮放範圍調整：完整顯示（不需要捲動）時才出現這個小提示，

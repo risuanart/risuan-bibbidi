@@ -442,11 +442,15 @@ function positionToolbar(id){
   if(!topLeftCell || !bottomRightCell){ deselectItem(); return; }
   toolbarEl.style.display = 'flex';
 
-  // 圖案完整的視窗座標範圍（不是只看單一格），左右都放不下時才能正確判斷要不要改貼上下方
+  // 圖案完整的視窗座標範圍（不是只看單一格），左右都放不下時才能正確判斷要不要改貼上下方。
+  // 用min/max而不是直接假設topLeftCell在視覺上一定在左上角——放大檢視橫式畫布轉向90度後，
+  // 邏輯上的「左上角格子」視覺上可能變成右上/左下，直接假設會算出負的寬高，導致工具列位置跑掉
   const topLeftRect = topLeftCell.getBoundingClientRect();
   const bottomRightRect = bottomRightCell.getBoundingClientRect();
-  const itemLeft = topLeftRect.left, itemRight = bottomRightRect.right;
-  const itemTop = topLeftRect.top, itemBottom = bottomRightRect.bottom;
+  const itemLeft = Math.min(topLeftRect.left, bottomRightRect.left);
+  const itemRight = Math.max(topLeftRect.right, bottomRightRect.right);
+  const itemTop = Math.min(topLeftRect.top, bottomRightRect.top);
+  const itemBottom = Math.max(topLeftRect.bottom, bottomRightRect.bottom);
 
   // 用視窗座標定位，並確保工具列一定落在畫面可見範圍內，
   // 避免圖案太大或太靠邊時，翻轉/刪除按鍵被卡在捲軸外點不到
@@ -489,11 +493,17 @@ function positionFrameAtBBox(bbox){
   if(!topCell || !bottomCell){ frameEl.style.display = 'none'; return; }
   const topRect = topCell.getBoundingClientRect();
   const bottomRect = bottomCell.getBoundingClientRect();
+  // 用min/max而不是直接假設topRect在視覺左上、bottomRect在視覺右下——放大檢視橫式畫布
+  // 轉向90度後這個假設不成立，直接相減會算出負的寬高，畫出一條變形的殘留線條
+  const left = Math.min(topRect.left, bottomRect.left);
+  const top = Math.min(topRect.top, bottomRect.top);
+  const right = Math.max(topRect.right, bottomRect.right);
+  const bottom = Math.max(topRect.bottom, bottomRect.bottom);
   frameEl.style.display = 'block';
-  frameEl.style.left = topRect.left + 'px';
-  frameEl.style.top = topRect.top + 'px';
-  frameEl.style.width = (bottomRect.right - topRect.left) + 'px';
-  frameEl.style.height = (bottomRect.bottom - topRect.top) + 'px';
+  frameEl.style.left = left + 'px';
+  frameEl.style.top = top + 'px';
+  frameEl.style.width = (right - left) + 'px';
+  frameEl.style.height = (bottom - top) + 'px';
 }
 
 function hideSelectionFrame(){
@@ -729,8 +739,11 @@ function positionCanvasFitBadge(){
 // 所以中間加一層 zoom-viewport，明確設定成縮放後的實際大小並裁切超出範圍的內容，
 // 外層 .grid-wrapper（inline-block）就會自動貼齊這層 viewport 的大小，不會多出空白可捲動。
 function updateGridWrapperSize(){
-  const w = gridCols * CELL_PX * zoom;
-  const h = gridRows * CELL_PX * zoom;
+  // 四捨五入成整數px：轉向時#zoomViewport靠(-50%,-50%)置中，如果寬高是小數，換算出來的
+  // 置中位移也會是小數，導致旋轉後的內容沒有對齊到整數像素格線，瀏覽器會做次像素模糊處理，
+  // 視覺上看起來就像整個畫布蒙上一層灰、對比度變低（手機Safari上特別明顯）
+  const w = Math.round(gridCols * CELL_PX * zoom);
+  const h = Math.round(gridRows * CELL_PX * zoom);
   zoomViewportEl.style.width = w + "px";
   zoomViewportEl.style.height = h + "px";
   // 任務23：轉向時 #zoomViewport 靠CSS轉90度置中撐滿，但它本身脫離了正常版面流（position:absolute），
@@ -739,9 +752,16 @@ function updateGridWrapperSize(){
   if(gridWrapperEl.classList.contains("rotated")){
     gridWrapperEl.style.width = h + "px";
     gridWrapperEl.style.height = w + "px";
+    // #zoomViewport轉90度後自己的視覺中心不會因為旋轉而移動，所以只要讓它「旋轉前」的中心
+    // 對齊grid-wrapper（已經是轉向後的h×w）的中心即可，兩式相減算出對齊需要的left/top，
+    // 全部四捨五入成整數px，避免次像素模糊（見上面updateGridWrapperSize開頭的說明）
+    zoomViewportEl.style.left = Math.round((h - w) / 2) + "px";
+    zoomViewportEl.style.top = Math.round((w - h) / 2) + "px";
   } else {
     gridWrapperEl.style.width = "";
     gridWrapperEl.style.height = "";
+    zoomViewportEl.style.left = "";
+    zoomViewportEl.style.top = "";
   }
 }
 
