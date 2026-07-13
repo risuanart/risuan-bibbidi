@@ -101,8 +101,8 @@
   *{box-sizing:border-box;touch-action:manipulation;}
   /* 任務21：手機long press不要跳出瀏覽器原生「拷貝/尋找所選範圍/查詢」選單或藍色選取控制點。
      input/textarea排除在外，讓輸入欄位還是能正常選字編輯（例如姓名、日期欄位）。 */
-  *{-webkit-touch-callout:none;user-select:none;}
-  input,textarea{-webkit-touch-callout:default;user-select:text;}
+  *{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+  input,textarea{-webkit-touch-callout:default;-webkit-user-select:text;user-select:text;}
   body{margin:0;font-family:"Noto Serif TC","Helvetica Neue",Arial,sans-serif;color:#222;}
   button,input,select,textarea{font-family:"LXGW WenKai TC","Noto Serif TC","Helvetica Neue",Arial,sans-serif;}
   .app{display:flex;min-height:100vh;}
