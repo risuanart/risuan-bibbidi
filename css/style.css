@@ -113,8 +113,10 @@
     position: absolute;      /* 貼到標題（.sidebar 內距頂端）右側，不佔原本版面高度 */
     top: 28px;                /* 對齊 .sidebar 的 padding-top，跟標題文字同一個起始高度 */
     right: 26px;               /* 對齊 .sidebar 的 padding-right */
-    background: var(--pill-bg);
-    color: var(--color-interactive);
+    /* 原本用--pill-bg（深色底混白色算出來的衍生色），跟其他按鈕的顏色邏輯對不起來，
+       改直接套用--color-primary-btn，看得出來這顆按鈕屬於「功能按鈕」這個色彩類別 */
+    background: var(--color-primary-btn);
+    color: #fff;
     border: none;
     border-radius: 20px;
     padding: 8px 12px;
@@ -363,7 +365,9 @@
   /* ---------- 右側畫布區 ---------- */
   .canvas-area{
     flex:1;padding:24px 32px;overflow:auto;position:relative;
-    background-color:var(--color-interactive);
+    /* 畫布後面的底色使用者指定用--color-light-bg（dcdcd1米灰白），
+       跟--color-interactive（icon-btn框線/hover等強調色用途）分開，不然兩者都用interactive會互相影響 */
+    background-color:var(--color-light-bg);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
     background-repeat:repeat;
   }
@@ -457,7 +461,10 @@
      全站6個彈窗（教學/確定清空/韓文防呆/輸出表單/輸出完成/解析度選擇）共用同一套.help-*樣式，
      顏色全部引用colors.css既有變數，沒有另外定義新色碼。 */
   .help-overlay{
-    position:fixed;inset:0;background:rgba(var(--color-dark-base-rgb),.6);
+    position:fixed;inset:0;
+    /* 只要毛玻璃模糊感，不要色調——改用中性黑色極低透明度，不用--color-dark-base（會染出紅棕色調） */
+    background:rgba(0,0,0,.22);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
     display:none;align-items:center;justify-content:center;
     z-index:700;padding:20px;overflow-y:auto; /* 內容較長的彈窗（例如輸出表單）在矮螢幕上還是能捲動看到底部按鈕 */
   }
