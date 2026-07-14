@@ -412,23 +412,25 @@
   .confirm-actions .action-btn{flex:1;margin-left:0;}
   .zoom-control{display:flex;align-items:center;gap:6px;margin-left:auto;}
   .zoom-control .action-btn{margin-left:0;}
+  /* 任務18：輸入框改成底線式（不是方框），標籤改成細字追蹤大寫，欄位間距加大 */
   .export-field{
-    display:flex;flex-direction:column;gap:3px;
+    display:flex;flex-direction:column;gap:6px;
   }
   .export-field label{
-    font-size:11px;color:var(--color-muted-text);padding-left:2px;
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-muted-text);
+    padding-left:0;font-family:"LXGW WenKai TC","Noto Serif TC",serif;
   }
   .export-input{
-    background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:20px;
-    font-size:13px;color:#222;
+    background:transparent;border:none;border-bottom:1px solid rgba(var(--color-dark-base-rgb),.3);
+    border-radius:0;padding:5px 2px 8px;font-size:14px;color:#222;
+    transition:border-color .15s ease;
   }
-  .export-input.missing{ border-color:var(--color-warning); }
-  .export-field-hint{ font-size:11px;color:var(--color-muted-text);line-height:1.5;padding-left:2px; }
-  #exportName{ width:110px; }
-  #exportDate{ width:130px; padding:7px 8px; }
+  .export-input:focus{ outline:none;border-bottom-color:var(--color-primary-btn); }
+  .export-input.missing{ border-bottom-color:var(--color-warning); }
+  .export-field-hint{ font-size:10.5px;color:var(--color-muted-text);line-height:1.6;padding-left:0;margin-top:2px; }
   .export-error{ color:var(--color-warning); font-size:13px; min-height:18px; }
   .export-form-fields{
-    display:flex;flex-direction:column;gap:14px;text-align:left;margin-bottom:6px;
+    display:flex;flex-direction:column;gap:20px;text-align:left;margin-bottom:6px;
   }
   .export-form-fields .export-input{ width:100%; }
   .action-btn:disabled{ opacity:.4;cursor:default; }
@@ -451,30 +453,73 @@
     z-index:600;
   }
 
+  /* ---------- 任務18：彈窗質感優化，「工藝標本卡」風格 ----------
+     全站6個彈窗（教學/確定清空/韓文防呆/輸出表單/輸出完成/解析度選擇）共用同一套.help-*樣式，
+     顏色全部引用colors.css既有變數，沒有另外定義新色碼。 */
   .help-overlay{
-    position:fixed;inset:0;background:rgba(20,20,18,.55);
+    position:fixed;inset:0;background:rgba(var(--color-dark-base-rgb),.6);
     display:none;align-items:center;justify-content:center;
-    z-index:700;padding:20px;
+    z-index:700;padding:20px;overflow-y:auto; /* 內容較長的彈窗（例如輸出表單）在矮螢幕上還是能捲動看到底部按鈕 */
   }
   .help-card{
-    background:#faf7f0;border-radius:16px;max-width:360px;width:100%;
-    padding:28px 26px 22px;position:relative;
-    box-shadow:rgba(0,0,0,0) 0px 0px 0px 0px, rgba(0,0,0,0) 0px 0px 0px 0px, rgba(0,0,0,0.1) 0px 20px 25px -5px, rgba(0,0,0,0.1) 0px 8px 10px -6px;
-    text-align:center;
-  }
-  .help-close{
-    position:absolute;top:12px;right:14px;background:none;border:none;
-    font-size:18px;color:var(--color-muted-text);cursor:pointer;line-height:1;padding:4px;
-  }
-  .help-close:hover{ color:#222; }
-  .help-icon{ font-size:44px;line-height:1;margin-bottom:14px; }
-  .help-title{ font-size:14px;font-weight:600;color:#222;margin:60px 0 5px;text-align:left; }
-  .help-desc{
-    font-size:12px;line-height:1.7;color:#555;margin:0 0 10px;min-height:70px;
+    background:var(--color-light-bg);border:1px solid rgba(var(--color-dark-base-rgb),.15);
+    border-radius:10px;max-width:360px;width:100%;
+    padding:26px 26px 22px;position:relative;
+    box-shadow:0 24px 40px -12px rgba(var(--color-dark-base-rgb),.35);
     text-align:left;
   }
+  .help-card.centered{ text-align:center; }
+  .help-close{
+    position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;
+    background:none;border:none;display:flex;align-items:center;justify-content:center;
+    font-size:15px;color:var(--color-muted-text);cursor:pointer;line-height:1;padding:0;
+    transition:background-color .15s ease;
+  }
+  .help-close:hover{ background:rgba(var(--color-dark-base-rgb),.08);color:#222; }
+
+  /* 圓形深色徽章：取代原本的emoji，裡面放線條風格SVG icon，疊一層極淡雜訊紋理增加質感 */
+  .help-medallion-row{ display:flex;align-items:center;gap:14px;margin-bottom:14px; }
+  .help-medallion{
+    flex:none;width:48px;height:48px;border-radius:50%;
+    background-color:var(--color-dark-base);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+    color:var(--color-light-text);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .help-card.centered .help-medallion{ margin:0 auto 14px; }
+  /* 破壞性操作（清空畫布）用警示色徽章 */
+  .help-medallion.warn{ background-color:var(--color-warning); }
+  .help-medallion svg{ width:22px;height:22px;stroke:currentColor;fill:none; }
+
+  .help-eyebrow{
+    font-size:10px;letter-spacing:.12em;color:var(--color-muted-text);text-transform:uppercase;
+    margin:0 0 3px;font-family:"LXGW WenKai TC","Noto Serif TC",serif;
+  }
+  .help-title{ font-size:16px;font-weight:700;color:#222;margin:0; }
+  .help-card.centered .help-title{ margin-top:2px; }
+  .help-rule{ height:1px;background:rgba(var(--color-dark-base-rgb),.14);margin:16px 0; }
+  .help-desc{
+    font-size:12.5px;line-height:1.8;color:#5a5346;margin:0 0 18px;
+  }
+  .help-desc.centered{ text-align:center; }
+
   .help-nav{ display:flex;align-items:center;justify-content:space-between;gap:10px; }
-  .help-nav-arrows{ display:flex;align-items:center;gap:14px; }
+  .help-dots{ display:flex;align-items:center;gap:6px; }
+  .help-dots span{
+    width:6px;height:6px;border-radius:50%;background:rgba(var(--color-dark-base-rgb),.18);
+    transition:all .15s ease;
+  }
+  .help-dots span.active{ background:var(--color-primary-btn);width:16px;border-radius:3px; }
+  .help-nav-btn{
+    width:30px;height:30px;border-radius:50%;flex:none;
+    border:1px solid rgba(var(--color-dark-base-rgb),.2);background:transparent;color:#222;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background-color .15s ease;
+  }
+  .help-nav-btn:hover{ background:rgba(var(--color-dark-base-rgb),.06); }
+  .help-nav-btn:disabled{ opacity:.3;cursor:default;background:none; }
+
   .res-preview-wrap{
     display:flex;justify-content:center;margin-bottom:14px;
   }
@@ -487,12 +532,6 @@
   }
   .res-slider-row input[type="range"]{ flex:1; }
   .res-slider-row span{ font-size:12px;color:#555;white-space:nowrap;width:70px;text-align:right; }
-  .help-nav-btn{
-    background:none;border:none;color:#222;cursor:pointer;padding:4px;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .help-nav-btn:disabled{ opacity:.3;cursor:default; }
-  .help-step-label{ font-size:12px;color:var(--color-muted-text); }
   .cell[data-item-id]{ cursor: grab; }
 .cell[data-item-id]:active{ cursor: grabbing; }
 .flip-icon-vertical{ transform: rotate(90deg); }

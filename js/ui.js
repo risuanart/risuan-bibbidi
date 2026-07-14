@@ -432,24 +432,33 @@ function finishExportCanvas(canvas){
   }, "image/png");
 }
 
-// ---- 使用說明：依照目前實際操作方式寫成一步一步的教學，搭配簡單的 emoji 圖示 ----
+// ---- 使用說明：依照目前實際操作方式寫成一步一步的教學 ----
+// 任務18：emoji換成線條風格SVG icon（裝在深色徽章裡），stroke用currentColor跟著.help-medallion的color走
 const helpSteps = [
-  { icon:"🎨", title:"1. 選擇圖案", desc:"從左側（手機版點右上角「分類」鈕）選一個分類，再點選想要使用的圖案。" },
-  { icon:"👆", title:"2. 放置圖案", desc:"選好圖案後，到右邊的格子畫布上點一下，圖案就會蓋印上去。" },
-  { icon:"✋", title:"3. 選取、移動與微調", desc:"點一下已經放置好的圖案可以選取它；按住並拖曳可以移動到新的位置。選取後旁邊會出現工具列，可以上下左右微調一格、水平/垂直翻轉，或刪除這個圖案。" },
-  { icon:"🧹", title:"4. 單格去除與復原", desc:"開啟「單格去除」可以一格一格清掉圖案的局部，不用整個刪除重蓋；操作錯了也可以按「復原」回到上一步。" },
-  { icon:"🔍", title:"5. 放大檢視", desc:"手機排版空間有限時，可以點「放大檢視」用更大的畫面檢視、微調圖案位置，裡面也可以用單格去除，或用「單格繪畫」直接手繪單一像素。" },
-  { icon:"📐", title:"6. 調整畫布尺寸", desc:"可以切換 A4／A3 紙張尺寸、直式／橫式，並用 ＋／－ 按鈕（手機可用雙指）縮放畫布大小；畫布完整顯示、不需要捲動時，旁邊會出現小標籤提醒。" },
-  { icon:"📤", title:"7. 輸出成品", desc:"拼貼完成後，記得填寫預約課程日期、時間與姓名，再點「輸出圖檔」下載成品圖片，方便我們依日期時間分類收件。" }
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4c1.7 0 3.1-1.4 3.1-3.1C20.5 6.6 16.7 2 12 2z"/><circle cx="7" cy="10" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16.5" cy="10" r="1"/></svg>`, title:"選擇圖案", desc:"從左側（手機版點右上角「分類」鈕）選一個分類，再點選想要使用的圖案。" },
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3-7 3 7"/><path d="M9 11a3 3 0 006 0"/><path d="M12 15v6"/><path d="M9 21h6"/></svg>`, title:"放置圖案", desc:"選好圖案後，到右邊的格子畫布上點一下，圖案就會蓋印上去。" },
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5a1.5 1.5 0 013 0v6"/><path d="M11 11V4a1.5 1.5 0 013 0v7"/><path d="M14 11.5V6a1.5 1.5 0 013 0v8"/><path d="M17 12l1.5 1a3 3 0 011.5 2.6V17a5 5 0 01-5 5h-3a5 5 0 01-4.2-2.3L5 15.5c-.6-.9-.4-1.7.3-2.2.7-.5 1.6-.4 2.2.3L9 15.5"/></svg>`, title:"選取、移動與微調", desc:"點一下已經放置好的圖案可以選取它；按住並拖曳可以移動到新的位置。選取後旁邊會出現工具列，可以上下左右微調一格、水平/垂直翻轉，或刪除這個圖案。" },
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l7.5-7.5a2 2 0 012.8 0l2.2 2.2a2 2 0 010 2.8L11 19"/><path d="M6 14l4 4"/><path d="M5 19h6"/></svg>`, title:"單格去除與復原", desc:"開啟「單格去除」可以一格一格清掉圖案的局部，不用整個刪除重蓋；操作錯了也可以按「復原」回到上一步。" },
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.35-4.35"/></svg>`, title:"放大檢視", desc:"手機排版空間有限時，可以點「放大檢視」用更大的畫面檢視、微調圖案位置，裡面也可以用單格去除，或用「單格繪畫」直接手繪單一像素。" },
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M7 5v3M11 5v2M15 5v3M19 5v2"/></svg>`, title:"調整畫布尺寸", desc:"可以切換 A4／A3 紙張尺寸、直式／橫式，並用 ＋／－ 按鈕（手機可用雙指）縮放畫布大小；畫布完整顯示、不需要捲動時，旁邊會出現小標籤提醒。" },
+  { icon:`<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>`, title:"輸出成品", desc:"拼貼完成後，記得填寫預約課程日期、時間與姓名，再點「輸出圖檔」下載成品圖片，方便我們依日期時間分類收件。" }
 ];
 let helpStepIndex = 0;
 
 function renderHelpStep(){
   const step = helpSteps[helpStepIndex];
-  document.getElementById("helpIcon").textContent = step.icon;
+  document.getElementById("helpIcon").innerHTML = step.icon;
   document.getElementById("helpTitle").textContent = step.title;
   document.getElementById("helpDesc").textContent = step.desc;
-  document.getElementById("helpStepLabel").textContent = `${helpStepIndex+1} / ${helpSteps.length}`;
+  document.getElementById("helpStepLabel").textContent = `Step ${String(helpStepIndex+1).padStart(2,"0")} / ${String(helpSteps.length).padStart(2,"0")}`;
+
+  const dotsEl = document.getElementById("helpDots");
+  dotsEl.innerHTML = "";
+  helpSteps.forEach((_, i)=>{
+    const dot = document.createElement("span");
+    if(i === helpStepIndex) dot.className = "active";
+    dotsEl.appendChild(dot);
+  });
 
   document.getElementById("helpPrevBtn").disabled = (helpStepIndex === 0);
   const nextBtn = document.getElementById("helpNextBtn");
@@ -457,8 +466,8 @@ function renderHelpStep(){
   nextBtn.title = isLast ? "完成" : "下一步";
   nextBtn.setAttribute("aria-label", isLast ? "Finish" : "Next");
   nextBtn.innerHTML = isLast
-    ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-    : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
+    ? `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+    : `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
 }
 
 function openHelp(){

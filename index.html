@@ -135,9 +135,11 @@
 <button class="help-btn" title="使用說明">?</button>
 
 <div class="help-overlay" id="resPickerOverlay">
-  <div class="help-card">
+  <div class="help-card centered">
     <button class="help-close" id="resPickerCloseBtn" title="關閉">✕</button>
-    <h3 class="help-title" style="text-align:center;margin-top:0;">選擇解析度</h3>
+    <p class="help-eyebrow">Resolution</p>
+    <h3 class="help-title">選擇解析度</h3>
+    <div class="help-rule"></div>
     <div class="res-preview-wrap">
       <canvas id="resPreviewCanvas" width="180" height="180"></canvas>
     </div>
@@ -145,7 +147,7 @@
       <input type="range" id="resSlider" min="8" max="40" value="20">
       <span id="resSliderLabel">20 x 20 格</span>
     </div>
-    <p class="help-desc" style="text-align:center;">格數越多，圖片細節越多，但佔用的畫布範圍也會變大；格數越少，形狀越簡化。</p>
+    <p class="help-desc centered">格數越多，圖片細節越多，但佔用的畫布範圍也會變大；格數越少，形狀越簡化。</p>
     <button class="action-btn primary" id="resConfirmBtn" style="width:100%;margin-left:0;">使用這個解析度</button>
   </div>
 </div>
@@ -153,23 +155,30 @@
 <div class="help-overlay" id="helpOverlay">
   <div class="help-card">
     <button class="help-close" id="helpCloseBtn" title="關閉">✕</button>
-    <div class="help-icon" id="helpIcon"></div>
-    <h3 class="help-title" id="helpTitle"></h3>
+    <div class="help-medallion-row">
+      <div class="help-medallion" id="helpIcon"></div>
+      <div>
+        <p class="help-eyebrow" id="helpStepLabel"></p>
+        <h3 class="help-title" id="helpTitle"></h3>
+      </div>
+    </div>
+    <div class="help-rule"></div>
     <p class="help-desc" id="helpDesc"></p>
     <div class="help-nav">
-      <span class="help-step-label" id="helpStepLabel"></span>
-      <div class="help-nav-arrows">
-        <button class="help-nav-btn" id="helpPrevBtn" title="上一步" aria-label="Previous"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="help-nav-btn" id="helpNextBtn" title="下一步" aria-label="Next"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
-      </div>
+      <button class="help-nav-btn" id="helpPrevBtn" title="上一步" aria-label="Previous"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="help-dots" id="helpDots"></div>
+      <button class="help-nav-btn" id="helpNextBtn" title="下一步" aria-label="Next"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
   </div>
 </div>
 
 <div class="help-overlay" id="confirmClearOverlay">
-  <div class="help-card">
-    <h3 class="help-title" style="text-align:center;margin-top:0;">確定要清空畫布嗎？</h3>
-    <p class="help-desc" style="text-align:center;">清空後將無法復原，已排版的內容會全部消失</p>
+  <div class="help-card centered">
+    <div class="help-medallion warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.8L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.8a2 2 0 00-3.4 0z"/></svg>
+    </div>
+    <h3 class="help-title">確定要清空畫布嗎？</h3>
+    <p class="help-desc centered">清空後將無法復原，已排版的內容會全部消失</p>
     <div class="confirm-actions">
       <button class="action-btn" id="confirmClearCancelBtn" style="margin-left:0;">取消</button>
       <button class="action-btn danger" id="confirmClearOkBtn" style="margin-left:0;">確定清空</button>
@@ -178,9 +187,12 @@
 </div>
 
 <div class="help-overlay" id="hangulWarnOverlay">
-  <div class="help-card">
-    <h3 class="help-title" style="text-align:center;margin-top:0;">這個組合不是真實存在的韓文字</h3>
-    <p class="help-desc" style="text-align:center;">這個組合不是真實存在的韓文字，確定要使用嗎？</p>
+  <div class="help-card centered">
+    <div class="help-medallion">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.7-2.5 2-2.5 3.5"/><path d="M12 17h.01"/></svg>
+    </div>
+    <h3 class="help-title">這個組合不是真實存在的韓文字</h3>
+    <p class="help-desc centered">這個組合不是真實存在的韓文字，確定要使用嗎？</p>
     <div class="confirm-actions">
       <button class="action-btn" id="hangulWarnEditBtn" style="margin-left:0;">修改</button>
       <button class="action-btn primary" id="hangulWarnUseBtn" style="margin-left:0;">確定使用</button>
@@ -190,8 +202,9 @@
 
 <div class="help-overlay" id="exportFormOverlay">
   <div class="help-card">
-    <h3 class="help-title" style="text-align:center;margin-top:0;">填寫預約資訊</h3>
-    <p class="help-desc" style="text-align:center;">請填寫以下資訊，才能輸出圖檔，方便我們依時段整理收件</p>
+    <p class="help-eyebrow">Before Export</p>
+    <h3 class="help-title">填寫預約資訊</h3>
+    <p class="help-desc">請填寫以下資訊，才能輸出圖檔，方便我們依時段整理收件</p>
     <div class="export-form-fields">
       <div class="export-field">
         <label for="exportDate">預約課程日期</label>
@@ -228,10 +241,13 @@
 </div>
 
 <div class="help-overlay" id="exportDoneOverlay">
-  <div class="help-card">
+  <div class="help-card centered">
     <button class="help-close" id="exportDoneCloseBtn" title="關閉">✕</button>
-    <h3 class="help-title" style="text-align:center;margin-top:0;">輸出完成！</h3>
-    <p class="help-desc" style="text-align:center;">還沒加畫室的 LINE 好友嗎？先加起來，之後圖檔才有地方傳給我們喔。</p>
+    <div class="help-medallion">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h3 class="help-title">輸出完成！</h3>
+    <p class="help-desc centered">還沒加畫室的 LINE 好友嗎？先加起來，之後圖檔才有地方傳給我們喔。</p>
     <a class="action-btn" id="joinLineBtn" href="#" target="_blank" rel="noopener" style="width:100%;margin-left:0;text-decoration:none;display:block;text-align:center;box-sizing:border-box;">加入畫室LINE好友</a>
   </div>
 </div>
