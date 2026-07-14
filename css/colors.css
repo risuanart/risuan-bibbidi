@@ -17,17 +17,18 @@
   --color-dark-base-rgb: 47,4,18;
 
   /* 警示/強調色：只能用在破壞性操作（例如清空畫布）。 */
-  --color-warning: #4F2432;
-  --color-warning-rgb: 79,36,50;
+  --color-warning: #2A1610;
+  --color-warning-rgb: 42,22,16;
 
-  /* 淺色文字/線條：取代原本的純白/米白文字。 */
-  --color-light-text: #B8B9EB;
+  /* 淺色文字/線條：取代原本的純白/米白文字。跟--color-interactive同色系但深一階，
+     兩個藍互相搭配做出層次（interactive較淺搶眼、light-text較深沉穩，避免兩者疊在一起時完全同色）。 */
+  --color-light-text: #9FBEE8;
 
   /* 淺色大面積背景：排版操作區、表單等淺色區塊背景。 */
   --color-light-bg: #ECE3DC;
 
   /* 互動狀態色：選字格預設框線（常態顯示，非僅限hover/選中狀態），可延伸用於其他選中/游標提示情境。 */
-  --color-interactive: #CEDBFE;
+  --color-interactive: #CEE3FE;
 
   /* 次要文字色：說明性質、非主要內容的小字（欄位提示、步驟指示、關閉按鈕預設色等）。 */
   --color-muted-text: #8a8578;
