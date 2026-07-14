@@ -148,7 +148,9 @@ function openResPicker(source, mode, itemId, initialRes){
   resPickerContext = { source, mode, itemId };
   document.getElementById("resSlider").value = initialRes || 20;
   updateResPreview();
-  document.getElementById("resPickerOverlay").classList.add("open");
+  const overlayEl = document.getElementById("resPickerOverlay");
+  overlayEl.classList.add("open");
+  overlayEl.scrollTop = 0; // 彈窗常駐DOM不會重建，上次關閉前如果有捲動過，重開時要重設回頂端
 }
 
 function closeResPicker(){

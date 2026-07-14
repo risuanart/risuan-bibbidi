@@ -519,13 +519,11 @@
       0 26px 60px rgba(0,0,0,.4);
     text-align:left;
     opacity:0;
-    /* 整張卡片微微傾斜，打破「貼在螢幕上的元件」的規矩感，傾斜角度在開合動畫的兩個狀態都固定
-       不變，只有位移(translateY)在動畫，避免看起來像卡片自己在旋轉飄動 */
-    transform:translateY(8px) rotate(-1.5deg);
+    transform:translateY(8px);
     transition:opacity 220ms ease-out, transform 220ms ease-out;
     overflow:hidden; /* 配合下面的紙張紋理，紋理鋪滿整張卡片，超出撕邊範圍的部分裁掉 */
   }
-  .help-overlay.open .receipt-card{ opacity:1;transform:translateY(0) rotate(-1.5deg); }
+  .help-overlay.open .receipt-card{ opacity:1;transform:translateY(0); }
   /* 使用者要求把階梯形缺角票卡取消、改回原本的鋸齒撕邊造型 */
   .receipt-card::before,.receipt-card::after{
     content:"";position:absolute;left:0;right:0;height:10px;z-index:2;
@@ -595,7 +593,7 @@
     font-weight:700;line-height:1.5;border-right:1px solid rgba(58,50,38,.25);padding-right:10px;
     align-self:stretch;display:flex;align-items:center;
   }
-  .receipt-row-value{ flex:1;min-width:0; }
+  .receipt-row-value{ flex:1;min-width:0;font-size:14px;line-height:1.5; }
   .receipt-input{
     width:100%;background:transparent;border:none;
     border-radius:0;padding:2px 0;font-size:14px;color:var(--color-interactive);
@@ -642,6 +640,28 @@
   }
   .receipt-btn:active{ transform:scale(.94) rotate(0deg) !important; }
   .receipt-btn:disabled{ opacity:.35;cursor:default; }
+  /* 任務18：輸入框改成底線式（不是方框），標籤改成細字追蹤大寫，欄位間距加大。
+     使用者要求填寫表單改回這套「工藝標本卡」風格（跟收據.receipt-*樣式分開），方便打字 */
+  .export-field{
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .export-field label{
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-muted-text);
+    padding-left:0;font-family:"LXGW WenKai TC","Noto Serif TC",serif;
+  }
+  .export-input{
+    background:transparent;border:none;border-bottom:1px solid rgba(var(--color-dark-base-rgb),.3);
+    border-radius:0;padding:5px 2px 8px;font-size:14px;color:#222;
+    transition:border-color .15s ease;
+  }
+  .export-input:focus{ outline:none;border-bottom-color:var(--color-primary-btn); }
+  .export-input.missing{ border-bottom-color:var(--color-warning); }
+  .export-field-hint{ font-size:10.5px;color:var(--color-muted-text);line-height:1.6;padding-left:0;margin-top:2px; }
+  .export-error{ color:var(--color-warning); font-size:13px; min-height:18px; }
+  .export-form-fields{
+    display:flex;flex-direction:column;gap:20px;text-align:left;margin-bottom:6px;
+  }
+  .export-form-fields .export-input{ width:100%; }
   .action-btn:disabled{ opacity:.4;cursor:default; }
 
   .grid-wrapper{display:inline-block;max-width:100%;border:2px solid rgba(var(--color-primary-btn-rgb),0.85);background:#fff;overflow:auto;max-height:70vh;padding:0;}
@@ -673,7 +693,15 @@
     /* 只要毛玻璃模糊感，不要色調——改用中性黑色極低透明度，不用--color-dark-base（會染出紅棕色調） */
     background:rgba(0,0,0,.22);
     -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-    display:flex;align-items:center;justify-content:center;
+    display:flex;justify-content:center;
+    /* flexbox置中+overflow:auto有個常見坑：內容比容器高時，用一般的align-items:center，
+       瀏覽器只會在「下面」多出可捲動的空間，「上面」超出的部分反而捲不到、永遠被裁掉看不到
+       （因為置中造成的上下溢出，瀏覽器預設只把捲動空間留給後面那一側）。
+       收據彈窗欄位變多之後高度常常超過螢幕，才踩到這個坑。改用align-items:safe center，
+       瀏覽器發現內容放不下時會自動退回貼齊頂端對齊，確保整個彈窗從頭到尾都能捲動看到，
+       不支援safe/unsafe關鍵字的舊瀏覽器會直接忽略這行、繼續用上面那行原本的center */
+    align-items:center;
+    align-items:safe center;
     z-index:700;padding:20px;overflow-y:auto; /* 內容較長的彈窗（例如輸出表單）在矮螢幕上還是能捲動看到底部按鈕 */
     opacity:0;visibility:hidden;pointer-events:none;
     transition:opacity 200ms ease-out, visibility 0s linear 200ms;

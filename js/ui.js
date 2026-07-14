@@ -141,7 +141,9 @@ function selectHangulGlyph(composed){
 let pendingHangulComposed = null;
 function openHangulWarn(composed){
   pendingHangulComposed = composed;
-  document.getElementById("hangulWarnOverlay").classList.add("open");
+  const overlayEl = document.getElementById("hangulWarnOverlay");
+  overlayEl.classList.add("open");
+  overlayEl.scrollTop = 0; // 彈窗常駐DOM不會重建，上次關閉前如果有捲動過，重開時要重設回頂端
 }
 function closeHangulWarn(){
   document.getElementById("hangulWarnOverlay").classList.remove("open");
@@ -491,7 +493,9 @@ function renderHelpStep(){
 function openHelp(){
   helpStepIndex = 0;
   renderHelpStep();
-  document.getElementById("helpOverlay").classList.add("open");
+  const overlayEl = document.getElementById("helpOverlay");
+  overlayEl.classList.add("open");
+  overlayEl.scrollTop = 0; // 彈窗常駐DOM不會重建，上次關閉前如果有捲動過，重開時要重設回頂端
 }
 function closeHelp(){
   document.getElementById("helpOverlay").classList.remove("open");
@@ -499,7 +503,9 @@ function closeHelp(){
 
 // ---- 清空畫布二次確認彈窗：避免手滑誤觸，把已排版的內容整個清掉 ----
 function openConfirmClear(){
-  document.getElementById("confirmClearOverlay").classList.add("open");
+  const overlayEl = document.getElementById("confirmClearOverlay");
+  overlayEl.classList.add("open");
+  overlayEl.scrollTop = 0; // 彈窗常駐DOM不會重建，上次關閉前如果有捲動過，重開時要重設回頂端
 }
 function closeConfirmClear(){
   document.getElementById("confirmClearOverlay").classList.remove("open");
@@ -516,16 +522,18 @@ function isExportFormComplete(){
 
 function updateExportFormConfirmState(){
   document.getElementById("exportFormConfirmBtn").disabled = !isExportFormComplete();
-  updateExportBarcodeNum();
 }
 
-// 收據風格的裝飾用編號，純視覺沒有實際查詢用途，用日期+時段組成，沒填完就顯示佔位橫線
-function updateExportBarcodeNum(){
+// 最後確認畫面的編號額外加一段隨機碼，讓每一張收據都不一樣（不會因為兩個人選同一個
+// 日期+時段就撞號），每次打開確認畫面都重新產生一組，網站沒有後端資料庫，
+// 沒辦法做真的流水號，隨機碼是在純前端環境下最實際的做法
+function updateExportConfirmBarcodeNum(){
   const dateVal = document.getElementById("exportDate").value;
   const timeVal = document.getElementById("exportTime").value;
-  const numEl = document.getElementById("exportBarcodeNum");
+  const numEl = document.getElementById("exportConfirmBarcodeNum");
   if(dateVal && timeVal){
-    numEl.textContent = `NO. ${dateVal.replace(/-/g, "")}-${timeVal.replace(":", "")}`;
+    const randomCode = Math.random().toString(36).slice(2, 6).toUpperCase();
+    numEl.textContent = `NO. ${dateVal.replace(/-/g, "")}-${timeVal.replace(":", "")}-${randomCode}`;
   } else {
     numEl.textContent = "NO. ————————";
   }
@@ -533,8 +541,9 @@ function updateExportBarcodeNum(){
 
 // 把使用者目前拼貼完成的圖案畫成小張像素縮圖印在收據上，每個人的設計都不一樣，
 // 讓這張收據有「這是我自己作品」的獨特感。跟js/ui.js的exportCanvasAsPng用同一套
-// 「算格數→逐格畫bitmap」邏輯，只是縮圖尺寸小很多、顏色改成收據墨水色（單色）
-function renderExportReceiptPreview(){
+// 「算格數→逐格畫bitmap」邏輯，只是縮圖尺寸小很多、顏色改成收據墨水色（單色）。
+// canvasId可以指定畫到填寫表單的縮圖、還是最後確認畫面的縮圖，兩邊共用同一套繪製邏輯
+function renderExportReceiptPreview(canvasId){
   const size = paperSizes[state.paper];
   let w = size.w, h = size.h;
   if(state.orientation === "Landscape"){ [w,h] = [h,w]; }
@@ -544,7 +553,7 @@ function renderExportReceiptPreview(){
   const maxDim = 260; // 拿掉條碼下方的分隔線、基本資料整個往下移騰出空間後，縮圖可以再放大
   const cellPx = Math.max(1, Math.floor(maxDim / Math.max(cols, rows)));
 
-  const canvas = document.getElementById("exportReceiptPreview");
+  const canvas = document.getElementById(canvasId || "exportReceiptPreview");
   canvas.width = cols * cellPx;
   canvas.height = rows * cellPx;
   const ctx = canvas.getContext("2d");
@@ -569,18 +578,52 @@ function renderExportReceiptPreview(){
   });
 }
 
+// 畫布尺寸/方向，直接讀state.paper/state.orientation（跟尺寸選單同一份資料），
+// 使用者不能在收據上另外改，純粹顯示目前排版設定給使用者確認
+function getExportCanvasSizeInfo(){
+  return `${state.paper}・${orientationLabels[state.orientation]}`;
+}
+
 function openExportForm(){
   updateExportFormConfirmState();
-  renderExportReceiptPreview();
-  document.getElementById("exportFormOverlay").classList.add("open");
+  const overlayEl = document.getElementById("exportFormOverlay");
+  overlayEl.classList.add("open");
+  // 彈窗常駐DOM不會重建，從「返回修改」重新打開時，如果上次關閉前有捲動過（例如捲到底部
+  // 按確定並輸出），沒重設就會維持捲動位置，重開時整個標題區塊都被捲到看不到，
+  // 使用者會誤以為畫面被裁切掉了
+  overlayEl.scrollTop = 0;
 }
 function closeExportForm(){
   document.getElementById("exportFormOverlay").classList.remove("open");
 }
 
+// ---- 輸出前的最後確認：只讀顯示剛填的資料，使用者再按一次「確認下載」才真的觸發輸出 ----
+function fillExportConfirmField(elId, value){
+  document.getElementById(elId).textContent = value || "（未填寫）";
+}
+function openExportConfirm(){
+  document.getElementById("exportConfirmCanvasSizeInfo").textContent = getExportCanvasSizeInfo();
+  fillExportConfirmField("exportConfirmDate", document.getElementById("exportDate").value);
+  fillExportConfirmField("exportConfirmTime", document.getElementById("exportTime").value);
+  fillExportConfirmField("exportConfirmName", document.getElementById("exportName").value.trim());
+  fillExportConfirmField("exportConfirmLineName", document.getElementById("exportLineName").value.trim());
+  fillExportConfirmField("exportConfirmOperator", document.getElementById("exportOperator").value.trim());
+  updateExportConfirmBarcodeNum();
+  renderExportReceiptPreview("exportConfirmPreview");
+  closeExportForm();
+  const overlayEl = document.getElementById("exportConfirmOverlay");
+  overlayEl.classList.add("open");
+  overlayEl.scrollTop = 0; // 同上，防止上次捲動位置殘留
+}
+function closeExportConfirm(){
+  document.getElementById("exportConfirmOverlay").classList.remove("open");
+}
+
 // ---- 輸出/分享完成後的提示：順便提醒使用者加畫室LINE好友，非必要、不擋流程 ----
 function openExportDone(){
-  document.getElementById("exportDoneOverlay").classList.add("open");
+  const overlayEl = document.getElementById("exportDoneOverlay");
+  overlayEl.classList.add("open");
+  overlayEl.scrollTop = 0; // 同上，防止上次捲動位置殘留
 }
 function closeExportDone(){
   document.getElementById("exportDoneOverlay").classList.remove("open");

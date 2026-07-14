@@ -205,8 +205,20 @@ document.getElementById("exportFormOverlay").onclick = (e)=>{
 };
 document.getElementById("exportFormConfirmBtn").onclick = ()=>{
   if(!validateExportFields()) return; // 保底檢查，正常情況下欄位沒填完按鈕本來就是 disabled
-  closeExportForm();
+  openExportConfirm(); // 先彈出唯讀的收據確認畫面，不會馬上下載
+};
+
+// 最後確認畫面：「返回修改」回到表單（欄位資料還在，不用重填），「確認下載」才真的觸發輸出
+document.getElementById("exportConfirmBackBtn").onclick = ()=>{
+  closeExportConfirm();
+  openExportForm();
+};
+document.getElementById("exportConfirmDownloadBtn").onclick = ()=>{
+  closeExportConfirm();
   exportCanvasAsPng();
+};
+document.getElementById("exportConfirmOverlay").onclick = (e)=>{
+  if(e.target.id === "exportConfirmOverlay"){ closeExportConfirm(); openExportForm(); } // 點背景霧面等同返回修改
 };
 
 document.getElementById("joinLineBtn").href = STUDIO_LINE_URL;
