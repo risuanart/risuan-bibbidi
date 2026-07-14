@@ -198,25 +198,36 @@ function renderIcons(){
 }
 
 function renderSizeOptions(){
-  sizeOptionsEl.innerHTML = "";
-  const wrap = document.createElement("div");
-  wrap.className = "segmented-control";
-  const slider = document.createElement("div");
-  slider.className = "segmented-slider";
-  wrap.appendChild(slider);
-  Object.keys(paperSizes).forEach(size=>{
-    const b = document.createElement("button");
-    b.className = state.paper===size ? "active" : "";
-    b.textContent = `${size}・NT$${paperSizes[size].price}`;
-    b.onclick = ()=>{ state.paper = size; renderSizeOptions(); buildGrid(false); };
-    wrap.appendChild(b);
-  });
-  sizeOptionsEl.appendChild(wrap);
+  // 任務17後發現的動效bug：原本每次都用innerHTML=""整個重建，重建出來的.segmented-slider是全新元素，
+  // 沒有「前一個位置」可以過渡。切到translateX(0)（清單第一個選項，例如A4）時，新元素本來就是從0開始，
+  // 等於沒有位移量、CSS transition偵測不到變化，動畫就消失了；切到其他非0位置則會正常有動畫，
+  // 才會出現「A4→A3滑順、A3→A4瞬間跳」這種方向不對稱的假象。修法：只在第一次真的建立DOM，
+  // 之後同一個.segmented-slider元素重複使用，動畫才有真正的「起點」可以過渡。
+  let wrap = sizeOptionsEl.querySelector(".segmented-control");
+  if(!wrap){
+    sizeOptionsEl.innerHTML = "";
+    wrap = document.createElement("div");
+    wrap.className = "segmented-control";
+    const slider = document.createElement("div");
+    slider.className = "segmented-slider";
+    wrap.appendChild(slider);
+    Object.keys(paperSizes).forEach(size=>{
+      const b = document.createElement("button");
+      b.dataset.size = size;
+      b.textContent = `${size}・NT$${paperSizes[size].price}`;
+      b.onclick = ()=>{ state.paper = size; renderSizeOptions(); buildGrid(false); };
+      wrap.appendChild(b);
+    });
+    sizeOptionsEl.appendChild(wrap);
 
-  const note = document.createElement("span");
-  note.className = "price-note";
-  note.textContent = "不含畫框費用";
-  sizeOptionsEl.appendChild(note);
+    const note = document.createElement("span");
+    note.className = "price-note";
+    note.textContent = "不含畫框費用";
+    sizeOptionsEl.appendChild(note);
+  }
+  wrap.querySelectorAll("button").forEach(b=>{
+    b.className = state.paper === b.dataset.size ? "active" : "";
+  });
 
   positionSegmentedSlider(sizeOptionsEl);
   updateCurrentPriceLabel();
@@ -245,20 +256,27 @@ function positionAllSegmentedSliders(){
 const orientationLabels = { "Portrait": "直式", "Landscape": "橫式" };
 
 function renderOrientation(){
-  orientationEl.innerHTML = "";
-  const wrap = document.createElement("div");
-  wrap.className = "segmented-control";
-  const slider = document.createElement("div");
-  slider.className = "segmented-slider";
-  wrap.appendChild(slider);
-  ["Portrait","Landscape"].forEach(o=>{
-    const b = document.createElement("button");
-    b.className = state.orientation===o ? "active" : "";
-    b.textContent = orientationLabels[o];
-    b.onclick = ()=>{ state.orientation = o; renderOrientation(); buildGrid(false); };
-    wrap.appendChild(b);
+  // 跟renderSizeOptions同一個修法，同一個原因（見上方註解）
+  let wrap = orientationEl.querySelector(".segmented-control");
+  if(!wrap){
+    orientationEl.innerHTML = "";
+    wrap = document.createElement("div");
+    wrap.className = "segmented-control";
+    const slider = document.createElement("div");
+    slider.className = "segmented-slider";
+    wrap.appendChild(slider);
+    ["Portrait","Landscape"].forEach(o=>{
+      const b = document.createElement("button");
+      b.dataset.orientation = o;
+      b.textContent = orientationLabels[o];
+      b.onclick = ()=>{ state.orientation = o; renderOrientation(); buildGrid(false); };
+      wrap.appendChild(b);
+    });
+    orientationEl.appendChild(wrap);
+  }
+  wrap.querySelectorAll("button").forEach(b=>{
+    b.className = state.orientation === b.dataset.orientation ? "active" : "";
   });
-  orientationEl.appendChild(wrap);
   positionSegmentedSlider(orientationEl);
 }
 

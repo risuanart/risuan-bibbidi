@@ -155,7 +155,41 @@
     white-space: nowrap;
     text-align: left;
   }
+
+  /* 功能面板（翻轉/調整解析度/刪除/上下左右微調）手機版改成固定貼在螢幕左邊緣的一整排直式按鈕，
+     不再跟著選取的圖案浮動移動；桌面版維持原本「貼著圖案旁邊」的浮動面板不變（見js/canvas.js
+     positionToolbar()，該函式在手機版寬度時會直接return、不計算left/top，改由這裡的CSS決定位置）。
+     用#itemToolbar前綴提高優先度，避免被後面桌面版同名class規則蓋掉（同一種踩過很多次的坑，
+     跟.tabs-wrap .tabs-toggle是同樣的原因）。 */
+  #itemToolbar{
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    max-height: calc(100vh - 16px); /* 8顆按鈕直排在矮螢幕（例如橫式手機）可能超出畫面高度，超過就自己捲動 */
+    overflow-y: auto;
+  }
+  #itemToolbar .toolbar-actions{
+    flex-direction: column;
+  }
+  #itemToolbar .nudge-pad{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  #itemToolbar .nudge-pad button{
+    border-radius: 7px;       /* 原本圓形按鈕排成十字形，現在跟其他按鈕一起直排，改回統一的圓角方形 */
+  }
+  /* 用#itemToolbar前綴（跟上面幾條同樣的理由），確保優先度贏過下面桌面版的.toolbar-sep{display:none}，
+     不然兩條選擇器優先度打平時，寫在後面的桌面規則會贏，導致手機版分隔線一直不會顯示
+     （這個坑在這個檔案已經踩過好幾次，這次直接照既有修法處理，不再犯） */
+  #itemToolbar .toolbar-sep{
+    display: block;
+    height: 1px;
+    background: rgba(255,255,255,.2);
+    margin: 2px 3px;
+  }
 }
+.toolbar-sep{ display:none; } /* 桌面版維持原本兩組（翻轉/刪除、方向鍵）分開的浮動面板樣式，不需要分隔線 */
   :root{
     --sidebar-bg:var(--color-dark-base);
     --sidebar-text:var(--color-light-text);
@@ -309,12 +343,14 @@
   grid-template-rows:25px 25px 25px;
   gap:2px;
 }
+/* 上下左右微調鍵改用--color-interactive（藍色，全站選取/互動語意的顏色），
+   跟翻轉/調整解析度的中性淺灰做出區隔，一眼就能分出「這組是移動控制」 */
 .item-toolbar .nudge-pad button{
   width:25px;height:25px;border:none;border-radius:50%;
-  background:color-mix(in srgb, var(--color-dark-base) 82%, white 18%);color:var(--color-light-text);cursor:pointer;padding:0;
+  background:var(--color-interactive);color:#fff;cursor:pointer;padding:0;
   display:flex;align-items:center;justify-content:center;
 }
-.item-toolbar .nudge-pad button:hover{ background:color-mix(in srgb, var(--color-dark-base) 70%, white 30%); }
+.item-toolbar .nudge-pad button:hover{ background:color-mix(in srgb, var(--color-interactive) 85%, white 15%); }
 .nudge-up{ grid-column:2; grid-row:1; }
 .nudge-left{ grid-column:1; grid-row:2; }
 .nudge-right{ grid-column:3; grid-row:2; }
@@ -332,38 +368,28 @@
   z-index:400;
   border-radius:2px;
 }
-/* 任務26調整：毛玻璃效果不是加在選取框「裡面」（那樣會把被選取的圖案本身模糊掉），
-   改成蓋在選取框「外面」——見下面 .canvas-glass-overlay，選取的圖案本身維持清楚不受影響。 */
-/* 選取狀態時，畫布區塊(藍色底)裡選取範圍以外的地方套上毛玻璃霧面，襯托出被選取的圖案；
-   用clip-path挖一個跟選取範圍一樣大小的洞，讓被選取的圖案本身不會被模糊到。
-   只蓋在.canvas-area範圍內（見JS用canvas-area的rect定位），不會跨到深色的側邊欄圖示選取區。
-   backdrop-filter 不支援的舊瀏覽器會直接忽略該行，退回半透明白色當fallback。 */
-.canvas-glass-overlay{
-  position:fixed;
-  display:none;
-  background: rgba(255,255,255,0.4);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  pointer-events:none;
-  z-index:390; /* 選取框(400)、功能面板(500)在它上面，才不會被自己的模糊效果影響 */
-}
-.canvas-glass-overlay.show{ display:block; }
+/* 任務26原本在選取框「外面」加毛玻璃霧面襯托，後來使用者回饋改成更直接的做法：
+   選取的圖案本身直接變色（見js/canvas.js的paintAll，套用PREVIEW_COLOR），
+   不用另外算一個毛玻璃遮罩的clip-path，.canvas-glass-overlay整組（HTML/CSS/JS）已經拿掉 */
+/* 原本這裡預設用color-mix(dark-base混白)當按鈕底色，跟面板本身的--color-primary-btn背景
+   明暗度太接近（就是colors.css裡註記過的那個「深色三兄弟對比度偏低」問題），手機版點進去看
+   完全分不出按鈕在哪裡。改成跟翻轉/方向鍵一樣統一用淺色底(--color-light-text)+深色字，
+   確保面板上每一顆按鈕都跟深色面板背景有明顯區隔，不用再另外為個別按鈕加例外規則 */
 .item-toolbar button{
   width:var(--toolbar-button-size);height:var(--toolbar-button-size);
   border:none;border-radius:4px;
-  background:color-mix(in srgb, var(--color-dark-base) 82%, white 18%);color:var(--color-light-text);
+  background:var(--color-light-text);color:var(--color-dark-base);
   font-size:14px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
 }
-.item-toolbar button:hover{ background:color-mix(in srgb, var(--color-dark-base) 70%, white 30%); }
-.item-toolbar button.danger{ background:rgba(var(--color-warning-rgb),0.75); }
+.item-toolbar button:hover{ background:#e0ddd0; }
+.item-toolbar button.danger{ background:rgba(var(--color-warning-rgb),0.85);color:#fff; }
 .item-toolbar button.danger:hover{ background:color-mix(in srgb, var(--color-warning) 85%, white 15%); }
-#flipHBtn, #flipVBtn, .item-toolbar .nudge-pad button{
-  background:var(--color-light-text);color:var(--color-dark-base);
-}
-#flipHBtn:hover, #flipVBtn:hover, .item-toolbar .nudge-pad button:hover{
-  background:#e0ddd0;
-}
+/* 使用者反饋：--color-warning現在是深藍灰色，「刪除圖案」這種真正的警示動作看不太出來，
+   垃圾桶這裡改用實際的紅色（沿用js/canvas.js裡ERASE_PREVIEW_COLOR同一支紅），只有這一個
+   按鈕例外，不動--color-warning本身，避免影響全站其他用到warning語意的地方 */
+#deleteItemBtn{ background:rgba(192,57,43,0.85); }
+#deleteItemBtn:hover{ background:rgba(192,57,43,1); }
   .icon-btn.selected{border-color:var(--color-interactive);background:color-mix(in srgb, var(--color-dark-base) 70%, white 30%);}
 
   /* ---------- 右側畫布區 ---------- */
@@ -411,6 +437,50 @@
     transition:transform 100ms ease-out;
   }
   .action-btn:active{ transform:scale(.96); }
+
+  /* 工具列圖示hover微動效：只在真的有滑鼠、能hover的裝置上生效（觸控裝置點擊後會卡在:hover
+     狀態，效果會變得很奇怪，用(hover:hover)排除），每個圖示依造型設計不同的動作，不是統一套用同一種效果 */
+  @media (hover:hover) and (pointer:fine){
+    .action-btn svg{ transition:transform 200ms ease-out; }
+    #undoBtn:hover svg{ transform:rotate(-20deg); }
+    #magnifyBtn:hover svg{ transform:scale(1.15); }
+
+    @keyframes icon-wiggle{ 0%,100%{ transform:rotate(-9deg); } 50%{ transform:rotate(9deg); } }
+    #eraserBtn:hover svg,#paintBtn:hover svg{ animation:icon-wiggle 300ms ease-in-out; }
+
+    /* 垃圾桶只讓「蓋子橫線＋提把」（第1、3條path）掀開，桶身（第2條path）不動 */
+    #clearBtn svg path{ transition:transform 220ms ease-out; transform-box:fill-box; transform-origin:left center; }
+    #clearBtn:hover svg path:nth-child(1),
+    #clearBtn:hover svg path:nth-child(3){ transform:rotate(-15deg); }
+
+    /* 下載箭頭只讓「箭身＋箭頭」（第1、2條path）往下滑，托盤底線（第3條path）不動 */
+    #exportBtn svg path{ transition:transform 200ms ease-out; }
+    #exportBtn:hover svg path:nth-child(1),
+    #exportBtn:hover svg path:nth-child(2){ transform:translateY(2px); }
+
+    /* 功能面板（翻轉/調整解析度/刪除/上下左右微調），跟上面同一套「依圖示造型設計動作」原則 */
+    #flipHBtn svg,#flipVBtn svg,#resizeItemBtn svg{ transition:transform 200ms ease-out; }
+    @keyframes flip-h-wiggle{ 0%,100%{ transform:scaleX(1); } 50%{ transform:scaleX(-1); } }
+    @keyframes flip-v-wiggle{ 0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(-1); } }
+    @keyframes resize-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(.78); } }
+    #flipHBtn:hover svg{ animation:flip-h-wiggle 350ms ease-in-out; }
+    #flipVBtn:hover svg{ animation:flip-v-wiggle 350ms ease-in-out; }
+    #resizeItemBtn:hover svg{ animation:resize-pulse 300ms ease-in-out; }
+
+    /* 刪除圖案的垃圾桶，跟#clearBtn同樣的「蓋子掀開」手法，但這顆按鈕的SVG結構不同
+       （第1個子元素是polyline不是path），蓋子/提把是第1、3個子元素，桶身(含中間兩條rib線)不動 */
+    #deleteItemBtn svg *{ transition:transform 220ms ease-out; transform-box:fill-box; transform-origin:left center; }
+    #deleteItemBtn:hover svg polyline:nth-child(1),
+    #deleteItemBtn:hover svg path:nth-child(3){ transform:rotate(-15deg); }
+
+    /* 上下左右微調鍵：往按下去會移動的方向輕輕探出去，跟翻轉/調整解析度的動作類型不同（位移vs縮放/翻轉），
+       行為上也呼應「這顆按鈕是做什麼的」 */
+    .nudge-pad button svg{ transition:transform 180ms ease-out; }
+    .nudge-up:hover svg{ transform:translateY(-2px); }
+    .nudge-down:hover svg{ transform:translateY(2px); }
+    .nudge-left:hover svg{ transform:translateX(-2px); }
+    .nudge-right:hover svg{ transform:translateX(2px); }
+  }
   .action-btn.primary{background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-btn-rgb),0.85);}
   .action-btn.eraser-default{background:rgba(var(--color-primary-btn-rgb),0.15);color:var(--color-primary-btn);border-color:rgba(var(--color-primary-btn-rgb),0.35);}
   .action-btn.eraser-active{background:rgba(var(--color-warning-rgb),0.45);color:#fff;border-color:rgba(var(--color-warning-rgb),0.45);}
@@ -667,8 +737,10 @@
 @media (prefers-reduced-motion: reduce){
   .help-overlay,.help-card,.magnify-overlay,.magnify-inner,
   .action-btn,.icon-btn,.help-close,.help-nav-btn,.magnify-close,
-  .tabs-wrap .tabs-toggle,.tab,.size-orientation-group,#sizeScrim{
-    transition:none !important;
+  .tabs-wrap .tabs-toggle,.tab,.size-orientation-group,#sizeScrim,
+  .action-btn svg,#clearBtn svg path,#exportBtn svg path,
+  #flipHBtn svg,#flipVBtn svg,#resizeItemBtn svg,#deleteItemBtn svg *,.nudge-pad button svg{
+    transition:none !important;animation:none !important;
   }
   .help-card{ transform:none !important; }
   .magnify-inner{ transform:none !important; }
