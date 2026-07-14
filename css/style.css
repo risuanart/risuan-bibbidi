@@ -493,27 +493,155 @@
   .confirm-actions .action-btn{flex:1;margin-left:0;}
   .zoom-control{display:flex;align-items:center;gap:6px;margin-left:auto;}
   .zoom-control .action-btn{margin-left:0;}
-  /* 任務18：輸入框改成底線式（不是方框），標籤改成細字追蹤大寫，欄位間距加大 */
-  .export-field{
-    display:flex;flex-direction:column;gap:6px;
+  /* ---------- 輸出前的「填寫預約資訊」彈窗：使用者指定的例外設計，復古打字機收據風格，
+     跟全站其他彈窗共用的.help-card「工藝標本卡」樣式脫鉤，只有這一個表單這樣做。
+     字體用Special Elite（index.html的Google Fonts已加），奶油色收據紙配深咖啡色墨水字，
+     跟colors.css的全站色票無關，是刻意的一次性例外（跟垃圾桶紅色、方向鍵藍色是同一種例外邏輯）。 */
+  .receipt-card{
+    position:relative;
+    /* isolation:isolate強制這裡自成一個獨立的堆疊環境，不然下面.receipt-grain的z-index:-1
+       會直接跟頁面其他層（例如.help-overlay的深色背景）比較，結果被壓到整個網站背景下面、
+       完全看不到，而不是只沉到這張卡片自己的文字內容下面 */
+    isolation:isolate;
+    width:320px;max-width:100%;
+    background:#f2ecd9;color:var(--color-interactive);
+    /* Google Fonts沒有真正的中文打字機字體（中文打字機歷史上是機械選字，不是像英文
+       一鍵一字敲擊，沒有發展出對應的字體視覺傳統）。改成Special Elite負責英文/數字，
+       LXGW WenKai TC接手中文——瀏覽器字型後備機制會自動依照每個字元找字型堆疊裡
+       第一個「有這個字的字符集」的字型，不用另外寫規則分開處理 */
+    font-family:"Special Elite","LXGW WenKai TC","Courier New",monospace;
+    /* 左右padding加大，讓內文比卡片本身窄一截，比較有「紙本身比印刷範圍寬」的感覺 */
+    padding:32px 40px 26px;
+    /* 雙層陰影：一層貼近邊緣的小範圍深色陰影營造實際厚度，一層大範圍柔和陰影營造懸浮感，
+       兩層疊加比單一陰影更有「真的放在桌上/離開螢幕表面」的實體感 */
+    box-shadow:
+      0 2px 6px rgba(0,0,0,.4),
+      0 26px 60px rgba(0,0,0,.4);
+    text-align:left;
+    opacity:0;
+    /* 整張卡片微微傾斜，打破「貼在螢幕上的元件」的規矩感，傾斜角度在開合動畫的兩個狀態都固定
+       不變，只有位移(translateY)在動畫，避免看起來像卡片自己在旋轉飄動 */
+    transform:translateY(8px) rotate(-1.5deg);
+    transition:opacity 220ms ease-out, transform 220ms ease-out;
+    overflow:hidden; /* 配合下面的紙張紋理，紋理鋪滿整張卡片，超出撕邊範圍的部分裁掉 */
   }
-  .export-field label{
-    font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-muted-text);
-    padding-left:0;font-family:"LXGW WenKai TC","Noto Serif TC",serif;
+  .help-overlay.open .receipt-card{ opacity:1;transform:translateY(0) rotate(-1.5deg); }
+  /* 使用者要求把階梯形缺角票卡取消、改回原本的鋸齒撕邊造型 */
+  .receipt-card::before,.receipt-card::after{
+    content:"";position:absolute;left:0;right:0;height:10px;z-index:2;
+    background:
+      linear-gradient(135deg, transparent 50%, #f2ecd9 50%) 0 0/13px 13px repeat-x,
+      linear-gradient(-135deg, transparent 50%, #f2ecd9 50%) 0 0/13px 13px repeat-x;
   }
-  .export-input{
-    background:transparent;border:none;border-bottom:1px solid rgba(var(--color-dark-base-rgb),.3);
-    border-radius:0;padding:5px 2px 8px;font-size:14px;color:#222;
-    transition:border-color .15s ease;
+  .receipt-card::before{ top:-9px;transform:rotate(180deg); }
+  .receipt-card::after{ bottom:-9px; }
+  /* 紙張紋理：使用者反饋摺痕線太假，拿掉那個效果。改成疊兩種不同尺度的雜訊——
+     一層細顆粒模擬紙纖維，一層大尺度、極低對比的雲霧狀雜訊模擬紙張本身厚薄不均勻，
+     兩層疊加比單一尺度的雜訊更接近真實紙張「近看有顆粒、遠看有大範圍色調不均」的樣子。
+     混合模式用multiply讓紋理自然融進紙面，不會蓋掉底色 */
+  .receipt-grain{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+    mix-blend-mode:multiply;
+    /* 第1層：極輕微暗角(radial-gradient)，紙張本身厚薄/受光不均勻的感覺，四角只比中央深5%，
+       維持很淡避免看起來像加了濾鏡。第2層：大尺度低對比雲霧狀雜訊，模擬紙張大範圍色調不均。
+       第3層：細顆粒雜訊模擬紙纖維。三層疊加比單一尺度的雜訊更接近真實紙張的質感層次 */
+    background-image:
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.05) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n2)' opacity='0.35'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='130'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+    background-size:100% 100%, 340px 340px, 130px 130px;
+    background-repeat:no-repeat, repeat, repeat;
+    opacity:.7;
   }
-  .export-input:focus{ outline:none;border-bottom-color:var(--color-primary-btn); }
-  .export-input.missing{ border-bottom-color:var(--color-warning); }
-  .export-field-hint{ font-size:10.5px;color:var(--color-muted-text);line-height:1.6;padding-left:0;margin-top:2px; }
-  .export-error{ color:var(--color-warning); font-size:13px; min-height:18px; }
-  .export-form-fields{
-    display:flex;flex-direction:column;gap:20px;text-align:left;margin-bottom:6px;
+  /* 邊框改用不規則的手繪圓（4個角各給不同的圓角比例），不是完美正圓，
+     再疊一圈微微偏移/旋轉、更淡的第二層邊框，模擬蓋印章時油墨不均、邊緣有點糊開的感覺 */
+  .receipt-pending-badge{
+    position:absolute;top:30px;right:20px;
+    width:52px;height:52px;
+    border-radius:47% 53% 51% 49% / 53% 47% 55% 45%;
+    border:2px solid rgba(140,35,32,.55);color:rgba(140,35,32,.55);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:8.5px;letter-spacing:.04em;font-weight:700;line-height:1.4;
+    transform:rotate(-16deg);
   }
-  .export-form-fields .export-input{ width:100%; }
+  .receipt-pending-badge::before{
+    content:"";position:absolute;inset:-3px;pointer-events:none;
+    border:1.5px solid rgba(140,35,32,.28);
+    border-radius:52% 48% 46% 54% / 44% 56% 48% 52%;
+    transform:rotate(7deg);
+  }
+  .receipt-head{ text-align:center;margin-bottom:14px; }
+  .receipt-mark{
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--color-interactive);margin:0 auto 8px;
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+  }
+  .receipt-shop{ font-size:15px;letter-spacing:.05em;margin:0 0 2px;font-weight:700; }
+  .receipt-sub{ font-size:10px;letter-spacing:.2em;color:#6b6153;margin:0; }
+  .receipt-rule{ width:80%;border:none;border-top:1.5px dashed #8a8066;margin:14px auto; }
+  .receipt-rule.solid{ border-top-style:double;border-top-width:4px; }
+  .receipt-lead{ font-size:10.5px;letter-spacing:.04em;color:#6b6153;margin:0 0 18px;text-align:center;line-height:1.8; }
+  /* 網格分格的票根/館本樣式：每個欄位是一整排橫線分隔的row，label靠左窄欄（跟value欄用
+     直線分開），取代原本每格獨立標籤+底線的排法。跟參考圖1、2的登機證/票根排版邏輯一樣 */
+  .receipt-fields{
+    display:flex;flex-direction:column;
+    border-top:1.5px solid var(--color-interactive);border-bottom:1.5px solid var(--color-interactive);
+  }
+  .receipt-row{
+    display:flex;align-items:center;gap:12px;padding:9px 0;
+  }
+  .receipt-row + .receipt-row{ border-top:1px solid rgba(58,50,38,.3); }
+  .receipt-row label{
+    flex:0 0 64px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6b6153;
+    font-weight:700;line-height:1.5;border-right:1px solid rgba(58,50,38,.25);padding-right:10px;
+    align-self:stretch;display:flex;align-items:center;
+  }
+  .receipt-row-value{ flex:1;min-width:0; }
+  .receipt-input{
+    width:100%;background:transparent;border:none;
+    border-radius:0;padding:2px 0;font-size:14px;color:var(--color-interactive);
+    font-family:inherit;transition:color .15s ease;
+  }
+  .receipt-input:focus{ outline:none; }
+  .receipt-input.missing{ color:#8c2320; }
+  .receipt-hint{ display:block;font-size:9px;color:#9a917f;line-height:1.6;margin-top:3px; }
+  /* 使用者拼貼完成的圖案，用像素點陣的方式印在收據上，像真的收據機印出來的感覺，
+     每個人的設計都長不一樣，這張收據才會有「這是我自己的作品」的獨特感。
+     使用者指定：拿掉文字說明、圖案移到基本資料上面、面積要比欄位區塊大，是收據的主角；
+     不要歪斜、不要框、不要底色，只留圖案本身直接印在紙上 */
+  .receipt-preview-wrap{ text-align:center;margin:4px 0 36px;display:flex;justify-content:center; }
+  .receipt-preview-canvas{
+    display:block;max-width:100%;height:auto;image-rendering:pixelated;
+    background:transparent;
+  }
+  .receipt-barcode{
+    height:26px;margin:16px 0 5px;position:relative;
+    background:repeating-linear-gradient(90deg,var(--color-interactive) 0 2px,transparent 2px 5px, var(--color-interactive) 5px 6px, transparent 6px 9px, var(--color-interactive) 9px 12px, transparent 12px 14px);
+  }
+  /* 條碼疊一層雜訊當印刷瑕疵，讓每一條線深淺不完全一致，不是印表機等級的精準乾淨線條，
+     混合模式用overlay（不是multiply）才會同時有變深跟變淺的地方，看起來像油墨濃淡不均 */
+  .receipt-barcode::before{
+    content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.6;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='26'%3E%3Cfilter id='bn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.3 0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23bn)'/%3E%3C/svg%3E");
+    background-repeat:repeat-x;
+  }
+  .receipt-barcode-num{ text-align:center;font-size:9.5px;letter-spacing:.2em;color:#6b6153; }
+  .receipt-error{ display:block;color:#8c2320;font-size:12px;min-height:16px;text-align:center;margin-top:10px; }
+  .receipt-actions{ display:flex;gap:10px;margin-top:18px;justify-content:center; }
+  .receipt-btn{
+    flex:1;max-width:112px;font-family:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+    cursor:pointer;padding:8px 10px;background:transparent;
+    transition:transform 120ms ease-out, background-color 120ms ease-out;
+  }
+  /* 印章感只留一點點歪斜就好，太明顯的旋轉角度看起來像壞掉、對不齊，不是故意做舊 */
+  .receipt-btn.cancel{ border:2px double #6b6153;color:#6b6153;transform:rotate(-0.5deg); }
+  .receipt-btn.confirm{
+    border:3px double #8c2320;color:#8c2320;transform:rotate(0.5deg);position:relative;
+  }
+  .receipt-btn.confirm::after{
+    content:"";position:absolute;inset:3px;border:1px solid #8c2320;opacity:.4;pointer-events:none;
+  }
+  .receipt-btn:active{ transform:scale(.94) rotate(0deg) !important; }
+  .receipt-btn:disabled{ opacity:.35;cursor:default; }
   .action-btn:disabled{ opacity:.4;cursor:default; }
 
   .grid-wrapper{display:inline-block;max-width:100%;border:2px solid rgba(var(--color-primary-btn-rgb),0.85);background:#fff;overflow:auto;max-height:70vh;padding:0;}
@@ -739,9 +867,10 @@
   .action-btn,.icon-btn,.help-close,.help-nav-btn,.magnify-close,
   .tabs-wrap .tabs-toggle,.tab,.size-orientation-group,#sizeScrim,
   .action-btn svg,#clearBtn svg path,#exportBtn svg path,
-  #flipHBtn svg,#flipVBtn svg,#resizeItemBtn svg,#deleteItemBtn svg *,.nudge-pad button svg{
+  #flipHBtn svg,#flipVBtn svg,#resizeItemBtn svg,#deleteItemBtn svg *,.nudge-pad button svg,
+  .receipt-card,.receipt-btn{
     transition:none !important;animation:none !important;
   }
-  .help-card{ transform:none !important; }
+  .help-card,.receipt-card{ transform:none !important; }
   .magnify-inner{ transform:none !important; }
 }

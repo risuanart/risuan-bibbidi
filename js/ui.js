@@ -516,10 +516,62 @@ function isExportFormComplete(){
 
 function updateExportFormConfirmState(){
   document.getElementById("exportFormConfirmBtn").disabled = !isExportFormComplete();
+  updateExportBarcodeNum();
+}
+
+// 收據風格的裝飾用編號，純視覺沒有實際查詢用途，用日期+時段組成，沒填完就顯示佔位橫線
+function updateExportBarcodeNum(){
+  const dateVal = document.getElementById("exportDate").value;
+  const timeVal = document.getElementById("exportTime").value;
+  const numEl = document.getElementById("exportBarcodeNum");
+  if(dateVal && timeVal){
+    numEl.textContent = `NO. ${dateVal.replace(/-/g, "")}-${timeVal.replace(":", "")}`;
+  } else {
+    numEl.textContent = "NO. ————————";
+  }
+}
+
+// 把使用者目前拼貼完成的圖案畫成小張像素縮圖印在收據上，每個人的設計都不一樣，
+// 讓這張收據有「這是我自己作品」的獨特感。跟js/ui.js的exportCanvasAsPng用同一套
+// 「算格數→逐格畫bitmap」邏輯，只是縮圖尺寸小很多、顏色改成收據墨水色（單色）
+function renderExportReceiptPreview(){
+  const size = paperSizes[state.paper];
+  let w = size.w, h = size.h;
+  if(state.orientation === "Landscape"){ [w,h] = [h,w]; }
+  const cols = Math.max(1, Math.round(w/state.gridMm));
+  const rows = Math.max(1, Math.round(h/state.gridMm));
+
+  const maxDim = 260; // 拿掉條碼下方的分隔線、基本資料整個往下移騰出空間後，縮圖可以再放大
+  const cellPx = Math.max(1, Math.floor(maxDim / Math.max(cols, rows)));
+
+  const canvas = document.getElementById("exportReceiptPreview");
+  canvas.width = cols * cellPx;
+  canvas.height = rows * cellPx;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // 跟卡片文字同一色（--color-interactive），Canvas 2D context抓不到CSS變數，只能寫死hex，
+  // 兩邊改色要記得一起改（colors.css的--color-interactive目前是#4C65A8）
+  ctx.fillStyle = "#4C65A8";
+  // 每格之間留一點縫（跟拼貼、馬賽克磚縫一樣的概念），讓一格一格的感覺更明顯，
+  // 不是印成連在一起的一片色塊。gap抓cellPx的12%，太小的縫在小尺寸縮圖上看不出來
+  const gap = cellPx * 0.03;
+  Object.keys(state.items).forEach(id=>{
+    const item = state.items[id];
+    const bitmap = getItemBitmap(item);
+    for(let i=0;i<bitmap.length;i++){
+      for(let j=0;j<bitmap[i].length;j++){
+        if(!bitmap[i][j]) continue;
+        const rr = item.r+i, cc = item.c+j;
+        if(rr<0||cc<0||rr>=rows||cc>=cols) continue;
+        ctx.fillRect(cc*cellPx + gap, rr*cellPx + gap, cellPx - gap*2, cellPx - gap*2);
+      }
+    }
+  });
 }
 
 function openExportForm(){
   updateExportFormConfirmState();
+  renderExportReceiptPreview();
   document.getElementById("exportFormOverlay").classList.add("open");
 }
 function closeExportForm(){
