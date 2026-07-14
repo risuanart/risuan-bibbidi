@@ -148,11 +148,11 @@ function openResPicker(source, mode, itemId, initialRes){
   resPickerContext = { source, mode, itemId };
   document.getElementById("resSlider").value = initialRes || 20;
   updateResPreview();
-  document.getElementById("resPickerOverlay").style.display = "flex";
+  document.getElementById("resPickerOverlay").classList.add("open");
 }
 
 function closeResPicker(){
-  document.getElementById("resPickerOverlay").style.display = "none";
+  document.getElementById("resPickerOverlay").classList.remove("open");
   resPickerContext = null;
 }
 

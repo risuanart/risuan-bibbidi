@@ -123,7 +123,9 @@
     font-size: 12px;
     cursor: pointer;
     z-index: 51;
+    transition: transform 100ms ease-out;
   }
+  .tabs-wrap .tabs-toggle:active{ transform:scale(.96); }
   .tabs-wrap .tabs{
     display: none;            /* 預設收合，點擊收合鈕才展開 */
     position: fixed;          /* 用fixed而不是absolute，避免被.sidebar自己的max-height+overflow-y裁切
@@ -234,10 +236,11 @@
   .tab{
     background:var(--pill-bg);border:none;color:var(--color-interactive);
     padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;
-    transition:background-color .15s ease;
+    transition:background-color .15s ease, transform 100ms ease-out;
   }
   .tab.active{background:var(--accent);color:var(--color-interactive);}
   .tab:hover{background:var(--color-interactive);color:var(--color-warning);}
+  .tab:active{ transform:scale(.96); }
 
   .icon-grid{
     /* 用auto-fill+minmax，欄數依實際可用寬度自動調整，不寫死欄數，
@@ -262,11 +265,12 @@
     background:transparent;border:1px solid var(--color-interactive);border-radius:8px;
     padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
     font-size:11px;cursor:pointer;overflow:hidden;
-    transition:background-color .15s ease;
+    transition:background-color .15s ease, transform 100ms ease-out;
   }
   .icon-btn:hover{
     background:var(--color-interactive);
   }
+  .icon-btn:active{ transform:scale(.94); }
   .icon-btn .glyph-label{font-size:12px;color:var(--color-interactive);transition:color .15s ease;}
   .icon-btn:hover .glyph-label{color:var(--color-warning);}
   .icon-delete-btn{
@@ -403,7 +407,10 @@
        電腦版瀏覽器不會有這個問題，所以之前沒發現。-webkit-appearance:none把系統原生按鈕外觀
        整個關掉，避免類似的樣式被系統預設值蓋過去 */
     color:#222;-webkit-appearance:none;appearance:none;
+    /* 任務17：按下去的觸感回饋，只用transform（GPU加速），不影響版面 */
+    transition:transform 100ms ease-out;
   }
+  .action-btn:active{ transform:scale(.96); }
   .action-btn.primary{background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-btn-rgb),0.85);}
   .action-btn.eraser-default{background:rgba(var(--color-primary-btn-rgb),0.15);color:var(--color-primary-btn);border-color:rgba(var(--color-primary-btn-rgb),0.35);}
   .action-btn.eraser-active{background:rgba(var(--color-warning-rgb),0.45);color:#fff;border-color:rgba(var(--color-warning-rgb),0.45);}
@@ -460,13 +467,22 @@
   /* ---------- 任務18：彈窗質感優化，「工藝標本卡」風格 ----------
      全站6個彈窗（教學/確定清空/韓文防呆/輸出表單/輸出完成/解析度選擇）共用同一套.help-*樣式，
      顏色全部引用colors.css既有變數，沒有另外定義新色碼。 */
+  /* 任務17：彈窗開合改用opacity+visibility切換（不再用display:none），這樣才有辦法做淡入淡出動畫。
+     元素常駐DOM（跟#sizeScrim同一套做法），position:fixed本來就不佔版面空間，關閉時pointer-events:none
+     避免擋住底下畫面的點擊。visibility延遲切換是為了關閉動畫播完之前，彈窗還是要保持不可點擊。 */
   .help-overlay{
     position:fixed;inset:0;
     /* 只要毛玻璃模糊感，不要色調——改用中性黑色極低透明度，不用--color-dark-base（會染出紅棕色調） */
     background:rgba(0,0,0,.22);
     -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-    display:none;align-items:center;justify-content:center;
+    display:flex;align-items:center;justify-content:center;
     z-index:700;padding:20px;overflow-y:auto; /* 內容較長的彈窗（例如輸出表單）在矮螢幕上還是能捲動看到底部按鈕 */
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity 200ms ease-out, visibility 0s linear 200ms;
+  }
+  .help-overlay.open{
+    opacity:1;visibility:visible;pointer-events:auto;
+    transition:opacity 200ms ease-out, visibility 0s linear 0s;
   }
   .help-card{
     background:var(--color-light-bg);border:1px solid rgba(var(--color-dark-base-rgb),.15);
@@ -474,15 +490,20 @@
     padding:26px 26px 22px;position:relative;
     box-shadow:0 24px 40px -12px rgba(var(--color-dark-base-rgb),.35);
     text-align:left;
+    /* 卡片淡入+輕微上移8px，跟遮罩同時開始但獨立控制時間，感覺比純淡入更有「浮現」的層次感 */
+    opacity:0;transform:translateY(8px);
+    transition:opacity 220ms ease-out, transform 220ms ease-out;
   }
+  .help-overlay.open .help-card{ opacity:1;transform:translateY(0); }
   .help-card.centered{ text-align:center; }
   .help-close{
     position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;
     background:none;border:none;display:flex;align-items:center;justify-content:center;
     font-size:15px;color:var(--color-muted-text);cursor:pointer;line-height:1;padding:0;
-    transition:background-color .15s ease;
+    transition:background-color .15s ease, transform 100ms ease-out;
   }
   .help-close:hover{ background:rgba(var(--color-dark-base-rgb),.08);color:#222; }
+  .help-close:active{ transform:scale(.9); }
 
   /* 圓形深色徽章：取代原本的emoji，裡面放線條風格SVG icon，疊一層極淡雜訊紋理增加質感 */
   .help-medallion-row{ display:flex;align-items:center;gap:14px;margin-bottom:14px; }
@@ -522,9 +543,10 @@
     width:30px;height:30px;border-radius:50%;flex:none;
     border:1px solid rgba(var(--color-dark-base-rgb),.2);background:transparent;color:#222;
     cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:background-color .15s ease;
+    transition:background-color .15s ease, transform 100ms ease-out;
   }
   .help-nav-btn:hover{ background:rgba(var(--color-dark-base-rgb),.06); }
+  .help-nav-btn:active:not(:disabled){ transform:scale(.9); }
   .help-nav-btn:disabled{ opacity:.3;cursor:default;background:none; }
 
   .res-preview-wrap{
@@ -552,20 +574,31 @@
 @media (max-width:900px){
   .magnify-btn{ display:inline-flex; }
 }
+/* 任務17：跟.help-overlay同一套開合邏輯，但改用縮放（0.96→1）取代位移，
+   因為這個彈窗接近全螢幕，位移8px感覺不明顯，縮放比較有「展開進入」的感覺 */
 .magnify-overlay{
-  display:none;position:fixed;inset:0;background:rgba(20,18,15,.7);
+  display:flex;position:fixed;inset:0;background:rgba(20,18,15,.7);
   z-index:800;padding:10px;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity 200ms ease-out, visibility 0s linear 200ms;
 }
-.magnify-overlay.open{ display:flex; }
+.magnify-overlay.open{
+  opacity:1;visibility:visible;pointer-events:auto;
+  transition:opacity 200ms ease-out, visibility 0s linear 0s;
+}
 .magnify-inner{
   flex:1;min-width:0;background:var(--main-bg);border-radius:16px;
   display:flex;flex-direction:column;overflow:hidden;position:relative;
+  transform:scale(.96);transition:transform 220ms ease-out;
 }
+.magnify-overlay.open .magnify-inner{ transform:scale(1); }
 .magnify-close{
   position:absolute;top:10px;right:10px;z-index:5;width:34px;height:34px;border-radius:50%;
   background:#222;color:#fff;border:none;font-size:15px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
+  transition:transform 100ms ease-out;
 }
+.magnify-close:active{ transform:scale(.9); }
 .magnify-tools-slot{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
   padding:14px 54px 10px 14px;
@@ -626,4 +659,17 @@
    方便細部修整或自行手繪，跟單格去除用同一種底色系統只是換個顏色區分開/關狀態 */
 .action-btn.paint-active{
   background:rgba(var(--color-primary-btn-rgb),0.85);color:#fff;border-color:rgba(var(--color-primary-btn-rgb),0.85);
+}
+
+/* 任務17：全站彈窗開合＋按鈕按壓的統一微動效，最後在這裡收尾——
+   使用者系統設定「減少動態效果」時，把所有淡入/位移/縮放動畫都直接關掉，只保留最終狀態的呈現，
+   一次蓋掉所有相關transition/transform，不用一條條回頭加例外 */
+@media (prefers-reduced-motion: reduce){
+  .help-overlay,.help-card,.magnify-overlay,.magnify-inner,
+  .action-btn,.icon-btn,.help-close,.help-nav-btn,.magnify-close,
+  .tabs-wrap .tabs-toggle,.tab,.size-orientation-group,#sizeScrim{
+    transition:none !important;
+  }
+  .help-card{ transform:none !important; }
+  .magnify-inner{ transform:none !important; }
 }

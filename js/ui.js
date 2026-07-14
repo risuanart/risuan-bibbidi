@@ -141,10 +141,10 @@ function selectHangulGlyph(composed){
 let pendingHangulComposed = null;
 function openHangulWarn(composed){
   pendingHangulComposed = composed;
-  document.getElementById("hangulWarnOverlay").style.display = "flex";
+  document.getElementById("hangulWarnOverlay").classList.add("open");
 }
 function closeHangulWarn(){
-  document.getElementById("hangulWarnOverlay").style.display = "none";
+  document.getElementById("hangulWarnOverlay").classList.remove("open");
   pendingHangulComposed = null;
 }
 
@@ -473,18 +473,18 @@ function renderHelpStep(){
 function openHelp(){
   helpStepIndex = 0;
   renderHelpStep();
-  document.getElementById("helpOverlay").style.display = "flex";
+  document.getElementById("helpOverlay").classList.add("open");
 }
 function closeHelp(){
-  document.getElementById("helpOverlay").style.display = "none";
+  document.getElementById("helpOverlay").classList.remove("open");
 }
 
 // ---- 清空畫布二次確認彈窗：避免手滑誤觸，把已排版的內容整個清掉 ----
 function openConfirmClear(){
-  document.getElementById("confirmClearOverlay").style.display = "flex";
+  document.getElementById("confirmClearOverlay").classList.add("open");
 }
 function closeConfirmClear(){
-  document.getElementById("confirmClearOverlay").style.display = "none";
+  document.getElementById("confirmClearOverlay").classList.remove("open");
 }
 
 // ---- 輸出圖檔前的預約資訊彈窗：三個欄位都填完才能繼續輸出 ----
@@ -502,16 +502,16 @@ function updateExportFormConfirmState(){
 
 function openExportForm(){
   updateExportFormConfirmState();
-  document.getElementById("exportFormOverlay").style.display = "flex";
+  document.getElementById("exportFormOverlay").classList.add("open");
 }
 function closeExportForm(){
-  document.getElementById("exportFormOverlay").style.display = "none";
+  document.getElementById("exportFormOverlay").classList.remove("open");
 }
 
 // ---- 輸出/分享完成後的提示：順便提醒使用者加畫室LINE好友，非必要、不擋流程 ----
 function openExportDone(){
-  document.getElementById("exportDoneOverlay").style.display = "flex";
+  document.getElementById("exportDoneOverlay").classList.add("open");
 }
 function closeExportDone(){
-  document.getElementById("exportDoneOverlay").style.display = "none";
+  document.getElementById("exportDoneOverlay").classList.remove("open");
 }
